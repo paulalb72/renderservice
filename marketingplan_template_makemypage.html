@@ -581,6 +581,13 @@
     .template-table.two-col th:first-child,
     .template-table.two-col td:first-child { width: 215pt; }
 
+    .template-table.funnel-table th:nth-child(1),
+    .template-table.funnel-table td:nth-child(1) { width: 33%; }
+    .template-table.funnel-table th:nth-child(2),
+    .template-table.funnel-table td:nth-child(2) { width: 40%; }
+    .template-table.funnel-table th:nth-child(3),
+    .template-table.funnel-table td:nth-child(3) { width: 27%; }
+
     .template-table.timeline-table th:nth-child(1),
     .template-table.timeline-table td:nth-child(1) { width: 92pt; }
     .template-table.timeline-table th:nth-child(2),
@@ -744,7 +751,7 @@
 {{ table_page(optTraffic, 7) }}
 {{ table_page(optConversion, 8, 'two-col') }}
 {{ table_page(nurturing, 9, 'two-col') }}
-{{ table_page(salesFunnel, 10) }}
+{{ table_page(salesFunnel, 10, 'funnel-table') }}
 {{ table_page(massnahmen, 11, 'timeline-table') }}
 
 <section class="page blue-page">
