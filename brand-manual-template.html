@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{COMPANY_NAME}} – Corporate Identity & Design System</title>
+
+<!--
+  ============================================================================
+  WIEDERVERWENDBARE VORLAGE · CORPORATE IDENTITY & DESIGN SYSTEM
+  ============================================================================
+  Struktur, Reihenfolge und Layout sind FIX. Pro Kunde werden ausschliesslich
+  die Inhalte ueber {{PLATZHALTER}} sowie die Farb-/Font-Werte im :root-Block
+  ausgetauscht.
+
+  >>> 2 MASTER-FARBEN <<<
+  Nur diese beiden Werte muessen exakt der Primaer- und der Akzentfarbe des
+  Kunden entsprechen. Aus ihnen leiten sich Header, Buttons, Akzente und
+  Linien des gesamten Dokuments ab:
+        --color-primary : {{COLOR_PRIMARY}}   (Beispiel #071B33)
+        --color-accent  : {{COLOR_ACCENT}}    (Beispiel #00A6B2)
+
+  Die vollstaendige Platzhalter-Liste steht am Dateiende (HTML-Kommentar).
+  ============================================================================
+-->
+
+<style>
+/* ===========================================================================
+   1. DESIGN TOKENS  (Teil 9 des Dokuments – zentrale Steuerung)
+   Alle Werte als CSS-Variablen. Farb- und Font-Platzhalter hier eintragen.
+   =========================================================================== */
+:root{
+
+  /* ----- MASTER-FARBEN (vom Kunden 1:1 eintragen) ----------------------- */
+  --color-primary:    {{COLOR_PRIMARY}};      /* Primaerfarbe – Header, Footer, Hero, Trust   */
+  --color-accent:     {{COLOR_ACCENT}};       /* Akzentfarbe  – Signet, Fokus, Marker, Kicker */
+
+  /* ----- WEITERE MARKENFARBEN (aus der Farbwelt-Tabelle) ---------------- */
+  --color-secondary:  {{COLOR_SECONDARY}};    /* Links, ausgew. CTAs, aktive Zustaende        */
+  --color-heading:    {{COLOR_HEADING}};      /* Headlines, starke Typografie                 */
+  --color-text:       {{COLOR_TEXT}};         /* Fliesstext                                   */
+  --color-muted:      {{COLOR_MUTED}};        /* Sekundaertext, Captions                      */
+  --color-line:       {{COLOR_LINE}};         /* Rahmen, Linien, Divider, Tabellen            */
+  --color-bg:         {{COLOR_BG}};           /* Hauptflaechen, Karten, Formulare             */
+  --color-bg-alt:     {{COLOR_BG_ALT}};       /* ruhige Alternativflaechen, Sektionen         */
+  --color-dark:       {{COLOR_DARK}};         /* sehr dunkle Premium-Flaechen, Footer tief    */
+
+  /* ----- FUNKTIONALE FARBEN --------------------------------------------- */
+  --color-success:    {{COLOR_SUCCESS}};
+  --color-warning:    {{COLOR_WARNING}};
+  --color-error:      {{COLOR_ERROR}};
+  --color-info:       {{COLOR_INFO}};
+
+  /* ----- TYPOGRAFIE ----------------------------------------------------- */
+  --font-heading: {{FONT_HEADING}}, "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body:    {{FONT_BODY}}, "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:    {{FONT_MONO}}, "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* ----- TYPE-SCALE (Desktop – Design-System-Vorgabe) ------------------- */
+  --fs-h1: 48px;  --fs-h2: 36px;  --fs-h3: 26px;  --fs-h4: 20px;
+  --fs-body: 17px; --fs-small: 14px; --fs-mono: 14px;
+
+  /* ----- SPACING-SKALA (4/8-basiert) ------------------------------------ */
+  --space-2xs: 4px;  --space-xs: 8px;   --space-sm: 12px; --space-md: 16px;
+  --space-lg: 24px;  --space-xl: 32px;  --space-2xl: 48px; --space-3xl: 64px;
+  --space-4xl: 96px; --space-5xl: 128px;
+
+  /* ----- RADIUS --------------------------------------------------------- */
+  --radius-sm: 4px;  --radius-md: 6px;  --radius-lg: 10px; --radius-xl: 16px;
+
+  /* ----- SCHATTEN (abgeleitet aus der Primaerfarbe) --------------------- */
+  --shadow-soft:   0 10px 30px color-mix(in srgb, var(--color-primary) 10%, transparent);
+  --shadow-hover:  0 16px 42px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  --shadow-header: 0 6px  24px color-mix(in srgb, var(--color-primary) 10%, transparent);
+
+  /* ----- LAYOUT --------------------------------------------------------- */
+  --max-content: {{MAX_CONTENT_WIDTH}};       /* z.B. 1200px */
+  --narrow-text: {{NARROW_TEXT_WIDTH}};       /* z.B. 760px  */
+}
+
+/* ===========================================================================
+   2. RESET & GRUNDLAGEN
+   =========================================================================== */
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+
+html{ -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+
+body{
+  font-family:var(--font-body);
+  font-size:var(--fs-body);
+  line-height:1.65;
+  color:var(--color-text);
+  /* Bildschirm-Hintergrund: neutraler "Schreibtisch", auf dem die Seiten liegen */
+  background:#e6eaf0;
+  padding:var(--space-3xl) var(--space-md);
+}
+
+h1,h2,h3,h4{ font-family:var(--font-heading); color:var(--color-heading); line-height:1.15; }
+p{ max-width:var(--narrow-text); }
+a{ color:var(--color-secondary); }
+code,pre{ font-family:var(--font-mono); }
+
+/* ===========================================================================
+   3. SEITEN-CONTAINER  (jeder Teil = eine "Seite")
+   Auf dem Bildschirm sichtbar als getrennte Blaetter; im Druck echte Seiten.
+   =========================================================================== */
+.page{
+  position:relative;
+  width:100%;
+  max-width:var(--max-content);
+  margin:0 auto var(--space-2xl);
+  background:var(--color-bg);
+  box-shadow:var(--shadow-soft);
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+}
+
+/* WICHTIG: Jeder Teil beginnt auf einer neuen Seite (PDF / Druck). */
+.part{ page-break-before: always; break-before: page; }
+.part:first-of-type{ page-break-before: avoid; break-before: avoid; }
+
+/* Innenabstaende der Seite (Premium-Padding aus dem Layout-System) */
+.page-body{ padding: var(--space-4xl) var(--space-3xl) var(--space-3xl); }
+
+/* Laufende Kopfzeile jeder Seite (wie im Quelldokument) */
+.runninghead{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:var(--space-sm) var(--space-3xl);
+  font-size:12px; color:var(--color-muted);
+  border-bottom:1px solid var(--color-line);
+}
+.runninghead .rh-title{ font-weight:600; color:var(--color-heading); }
+
+/* ===========================================================================
+   4. TYPO-BAUSTEINE
+   =========================================================================== */
+.kicker{
+  display:inline-block;
+  font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--color-accent);
+  margin-bottom:var(--space-sm);
+}
+.part-no{
+  font-family:var(--font-mono); font-size:14px; font-weight:500;
+  color:var(--color-accent); letter-spacing:.05em;
+}
+h1{ font-size:var(--fs-h1); font-weight:700; }
+h2{ font-size:var(--fs-h2); font-weight:650; margin-top:var(--space-2xl); }
+h3{ font-size:var(--fs-h3); font-weight:650; margin:var(--space-xl) 0 var(--space-md); }
+h4{ font-size:var(--fs-h4); font-weight:600; margin:var(--space-lg) 0 var(--space-xs); }
+.lead{ font-size:19px; color:var(--color-text); margin-top:var(--space-md); max-width:var(--narrow-text); }
+.part-title{ margin-top:var(--space-xs); }
+.subtitle{ color:var(--color-muted); margin-top:var(--space-xs); font-size:18px; max-width:var(--narrow-text); }
+
+p + p{ margin-top:var(--space-md); }
+ul,ol{ margin:var(--space-md) 0 var(--space-md) var(--space-lg); max-width:var(--narrow-text); }
+li{ margin-bottom:var(--space-xs); }
+
+/* Accent-Trennlinie unter Teil-Ueberschriften */
+.part-rule{
+  height:3px; width:64px; border:0; border-radius:99px;
+  background:var(--color-accent);
+  margin:var(--space-md) 0 var(--space-lg);
+}
+
+/* ===========================================================================
+   5. TABELLEN  (Fragebogen, Werte, Tokens …)
+   =========================================================================== */
+table{ width:100%; border-collapse:collapse; margin:var(--space-md) 0 var(--space-lg);
+  font-size:var(--fs-small); }
+caption{ text-align:left; font-weight:600; color:var(--color-heading); margin-bottom:var(--space-xs); }
+th,td{ text-align:left; vertical-align:top; padding:var(--space-sm) var(--space-md);
+  border-bottom:1px solid var(--color-line); }
+thead th{
+  background:var(--color-bg-alt); color:var(--color-heading);
+  font-weight:600; border-bottom:2px solid var(--color-line);
+}
+tbody tr:hover{ background:color-mix(in srgb, var(--color-accent) 5%, transparent); }
+td code{ font-size:13px; background:var(--color-bg-alt); padding:2px 6px; border-radius:var(--radius-sm); }
+
+/* ===========================================================================
+   6. KOMPONENTEN  (Callouts, Cards, Swatches, Buttons, Code)
+   =========================================================================== */
+
+/* Hinweis-Callout */
+.callout{
+  border-left:4px solid var(--color-accent);
+  background:var(--color-bg-alt);
+  padding:var(--space-md) var(--space-lg);
+  border-radius:0 var(--radius-md) var(--radius-md) 0;
+  margin:var(--space-lg) 0;
+}
+.callout strong{ color:var(--color-heading); }
+.callout--primary{ border-left-color:var(--color-primary); }
+
+/* Card-Grid (Leistungen, Prozess, Trust …) */
+.card-grid{ display:grid; gap:var(--space-xl); margin:var(--space-lg) 0; }
+.card-grid.cols-2{ grid-template-columns:repeat(2,1fr); }
+.card-grid.cols-3{ grid-template-columns:repeat(3,1fr); }
+.card{
+  background:var(--color-bg);
+  border:1px solid var(--color-line);
+  border-radius:var(--radius-lg);
+  padding:var(--space-xl);
+  transition:box-shadow .18s ease-out, border-color .18s ease-out, transform .18s ease-out;
+}
+.card:hover{ box-shadow:var(--shadow-hover); border-color:var(--color-accent); transform:translateY(-2px); }
+.card h4{ margin-top:0; }
+.card .card-tag{ font-family:var(--font-mono); font-size:12px; color:var(--color-accent);
+  text-transform:uppercase; letter-spacing:.05em; }
+
+/* Farb-Swatch-Tabelle */
+.swatch{
+  width:40px; height:40px; border-radius:var(--radius-md);
+  border:1px solid var(--color-line); display:inline-block; vertical-align:middle;
+}
+.swatch-row td:first-child{ width:64px; }
+
+/* Buttons – leiten sich aus den Master-Farben ab */
+.btn{
+  display:inline-block; font-family:var(--font-body); font-weight:650; font-size:15px;
+  padding:15px 24px; border-radius:var(--radius-md); border:1px solid transparent;
+  cursor:pointer; transition:all .18s ease-out; text-decoration:none; line-height:1;
+}
+.btn:hover{ transform:translateY(-1px); }
+.btn-primary{ background:var(--color-primary); color:#fff; }
+.btn-primary:hover{ background:var(--color-accent); }
+.btn-secondary{ background:transparent; color:var(--color-primary);
+  border-color:var(--color-primary); }
+.btn-secondary:hover{ background:var(--color-bg-alt); }
+.btn-row{ display:flex; gap:var(--space-md); flex-wrap:wrap; margin:var(--space-md) 0; }
+
+/* Code-Block (Tokens, YAML, Prompts) */
+pre{
+  background:var(--color-dark); color:#dce6f5;
+  padding:var(--space-lg); border-radius:var(--radius-lg);
+  overflow:auto; font-size:13px; line-height:1.55; margin:var(--space-md) 0;
+}
+pre code{ color:inherit; background:none; padding:0; }
+
+/* Logo-Vorschau (Wortmarke + Signet) */
+.logo-preview{
+  display:flex; align-items:center; gap:var(--space-md);
+  padding:var(--space-xl); border:1px dashed var(--color-line);
+  border-radius:var(--radius-lg); margin:var(--space-md) 0; background:var(--color-bg-alt);
+}
+.logo-node{
+  width:40px; height:40px; border-radius:8px; flex:none;
+  background:linear-gradient(135deg, var(--color-primary), var(--color-accent));
+}
+.logo-word{ font-family:var(--font-heading); font-weight:700; font-size:24px; color:var(--color-primary); }
+.logo-claim{ font-size:13px; color:var(--color-muted); }
+.logo-preview.dark{ background:var(--color-primary); border-color:transparent; }
+.logo-preview.dark .logo-word{ color:#fff; }
+.logo-preview.dark .logo-claim{ color:#c8d6ea; }
+
+/* Bild-Platzhalter */
+.img-ph{
+  display:flex; align-items:center; justify-content:center;
+  background:var(--color-bg-alt); border:1px dashed var(--color-line);
+  border-radius:var(--radius-lg); color:var(--color-muted); font-size:13px;
+  min-height:160px; text-align:center; padding:var(--space-md);
+}
+
+/* ===========================================================================
+   7. DECKBLATT
+   =========================================================================== */
+.cover{ background:var(--color-primary); color:#fff; }
+.cover .page-body{ padding:var(--space-5xl) var(--space-3xl); }
+.cover .kicker{ color:var(--color-accent); }
+.cover h1{ color:#fff; font-size:52px; max-width:14ch; }
+.cover .cover-sub{ color:#c8d6ea; font-size:19px; margin-top:var(--space-lg); max-width:60ch; }
+.cover-meta{ display:grid; grid-template-columns:repeat(2,1fr); gap:var(--space-lg);
+  margin-top:var(--space-4xl); max-width:760px; }
+.cover-meta .label{ font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--color-accent); }
+.cover-meta .value{ font-size:16px; color:#fff; margin-top:4px; }
+.cover-tag{ position:absolute; top:var(--space-xl); right:var(--space-3xl);
+  font-family:var(--font-mono); font-size:12px; color:var(--color-accent);
+  border:1px solid color-mix(in srgb, var(--color-accent) 50%, transparent);
+  padding:6px 12px; border-radius:99px; }
+
+/* ===========================================================================
+   8. RESPONSIVE  (Bildschirm)
+   =========================================================================== */
+@media (max-width:900px){
+  .card-grid.cols-3{ grid-template-columns:repeat(2,1fr); }
+  .cover-meta{ grid-template-columns:1fr; }
+  .cover h1{ font-size:38px; }
+}
+@media (max-width:600px){
+  body{ padding:var(--space-md); }
+  .card-grid.cols-2,.card-grid.cols-3{ grid-template-columns:1fr; }
+  .page-body{ padding:var(--space-2xl) var(--space-lg); }
+  .runninghead{ padding:var(--space-sm) var(--space-lg); }
+  :root{ --fs-h1:32px; --fs-h2:26px; --fs-h3:22px; }
+}
+
+/* ===========================================================================
+   9. DRUCK / PDF-EXPORT  – saubere A4-Seiten, ein Teil pro Seite
+   =========================================================================== */
+@page{ size:A4; margin:14mm; }
+@media print{
+  body{ background:#fff; padding:0; }
+  .page{ box-shadow:none; border-radius:0; max-width:none; margin:0; }
+  .part{ page-break-before:always; break-before:page; }
+  .cover{ page-break-after:always; break-after:page; }
+  .card:hover,.btn:hover{ transform:none; box-shadow:none; }
+  tbody tr:hover{ background:none; }
+  pre{ white-space:pre-wrap; word-break:break-word; }
+  a{ color:var(--color-secondary); text-decoration:none; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===========================================================================
+     DECKBLATT
+     =========================================================================== -->
+<section class="page cover">
+  <span class="cover-tag">{{DOCUMENT_TAG}}</span>
+  <div class="page-body">
+    <span class="kicker">{{WORKFLOW_LABEL}} · {{DOCUMENT_DATE}}</span>
+    <h1>Corporate Identity &amp; Corporate Design System</h1>
+    <p class="cover-sub">{{COVER_SUBTITLE}}</p>
+
+    <div class="cover-meta">
+      <div><div class="label">Unternehmen</div><div class="value">{{COMPANY_LEGAL_NAME}}</div></div>
+      <div><div class="label">Ziel</div><div class="value">{{PROJECT_GOAL}}</div></div>
+      <div><div class="label">Plattform</div><div class="value">{{PLATFORM}}</div></div>
+      <div><div class="label">Status</div><div class="value">{{STATUS}}</div></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===========================================================================
+     TEIL 0 · ZWECK DES DOKUMENTS
+     =========================================================================== -->
+<section class="page part">
+  <div class="runninghead">
+    <span class="rh-title">{{COMPANY_NAME}} – Corporate Identity &amp; Design System</span>
+    <span>Seite 2</span>
+  </div>
+  <div class="page-body">
+    <span class="part-no">Teil 0</span>
+    <h2 class="part-title">Zweck des Dokuments</h2>
+    <hr class="part-rule" />
+
+    <p>{{PURPOSE_INTRO}}</p>
+
+    <div class="callout">
+      <strong>Wichtig.</strong> {{PURPOSE_DISCLAIMER}}
+    </div>
+
+    <h3>Arbeitsgrundlage</h3>
+    <table>
+      <thead><tr><th>Quelle</th><th>Verwendeter Kontext</th></tr></thead>
+      <tbody>
+        <tr><td>{{SOURCE_1_NAME}}</td><td>{{SOURCE_1_CONTEXT}}</td></tr>
+        <tr><td>{{SOURCE_2_NAME}}</td><td>{{SOURCE_2_CONTEXT}}</td></tr>
+      </tbody>
+    </table>
+    <p>{{SOURCE_NOTE}}</p>
+
+    <h3>Empfohlener Workflow</h3>
+    <ol>
+      <li><strong>Markenlogik klären:</strong> {{WORKFLOW_STEP_1}}</li>
+      <li><strong>Markenbotschaft definieren:</strong> {{WORKFLOW_STEP_2}}</li>
+      <li><strong>Visuelles System entwickeln:</strong> {{WORKFLOW_STEP_3}}</li>
+      <li><strong>Plattform zentralisieren:</strong> {{WORKFLOW_STEP_4}}</li>
+      <li><strong>Qualität prüfen:</strong> {{WORKFLOW_STEP_5}}</li>
+      <li><strong>KI-Artefakt exportieren:</strong> {{WORKFLOW_STEP_6}}</li>
+    </ol>
+  </div>
+</section>
+
+
+<!-- ===========================================================================
+     TEIL 1 · STRATEGISCHE MARKENBASIS
+     =========================================================================== -->
+<section class="page part">
+  <div class="runninghead">
+    <span class="rh-title">{{COMPANY_NAME}} – Corporate Identity &amp; Design System</span>
+    <span>Seite 3</span>
+  </div>
+  <div class="page-body">
+    <span class="part-no">Teil 1</span>
+    <h2 class="part-title">Strategische Markenbasis</h2>
+    <hr class="part-rule" />
+    <p class="subtitle">{{PART1_SUBTITLE}}</p>
+
+    <h3>1.1 Unternehmensidentität</h3>
+    <table>
+      <thead><tr><th style="width:38%">Frage</th><th>Antwort</th></tr></thead>
+      <tbody>
+        <tr><td>Wofür steht das Unternehmen?</td><td>{{BRAND_STANDS_FOR}}</td></tr>
+        <tr><td>Warum existiert das Unternehmen?</td><td>{{BRAND_EXISTS_BECAUSE}}</td></tr>
+        <tr><td>Welches Problem löst es?</td><td>{{PROBLEM_SOLVED}}</td></tr>
+        <tr><td>Für wen löst es dieses Problem?</td><td>{{PROBLEM_FOR_WHOM}}</td></tr>
+        <tr><td>Was macht es besser als Wettbewerber?</td><td>{{COMPETITIVE_ADVANTAGE}}</td></tr>
+        <tr><td>Welche Werte sollen vermittelt werden?</td><td>{{BRAND_VALUES}}</td></tr>
+        <tr><td>Welche Marktrolle soll eingenommen werden?</td><td>{{MARKET_ROLE}}</td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.2 Markenwirkung</h3>
+    <table>
+      <thead><tr><th>Dimension</th><th>Entscheidung</th><th>Design-Konsequenz</th></tr></thead>
+      <tbody>
+        <tr><td>Hochwertig vs. nahbar</td><td>{{DIM1_DECISION}}</td><td>{{DIM1_CONSEQUENCE}}</td></tr>
+        <tr><td>Technisch vs. emotional</td><td>{{DIM2_DECISION}}</td><td>{{DIM2_CONSEQUENCE}}</td></tr>
+        <tr><td>Modern vs. traditionell</td><td>{{DIM3_DECISION}}</td><td>{{DIM3_CONSEQUENCE}}</td></tr>
+        <tr><td>Minimalistisch vs. ausdrucksstark</td><td>{{DIM4_DECISION}}</td><td>{{DIM4_CONSEQUENCE}}</td></tr>
+        <tr><td>Sachlich vs. inspirierend</td><td>{{DIM5_DECISION}}</td><td>{{DIM5_CONSEQUENCE}}</td></tr>
+        <tr><td>Lokal vs. international</td><td>{{DIM6_DECISION}}</td><td>{{DIM6_CONSEQUENCE}}</td></tr>
+        <tr><td>Emotion</td><td>{{EMOTION_DECISION}}</td><td>{{EMOTION_CONSEQUENCE}}</td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.3 Positionierung und Abgrenzung</h3>
+    <table>
+      <thead><tr><th style="width:32%">Thema</th><th>Ausarbeitung</th></tr></thead>
+      <tbody>
+        <tr><td>Differenzierung</td><td>{{DIFFERENTIATION}}</td></tr>
+        <tr><td>Zu entkräftende Einwände</td><td>{{OBJECTIONS_TO_COUNTER}}</td></tr>
+        <tr><td>Warum Vertrauen?</td><td>{{WHY_TRUST}}</td></tr>
+        <tr><td>Sofort sichtbare Argumente</td><td>{{VISIBLE_ARGUMENTS}}</td></tr>
+        <tr><td>Benötigte Beweise</td><td>{{REQUIRED_PROOFS}}</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout--primary">
+      <strong>Strategische Leitentscheidung.</strong> {{STRATEGIC_LEAD_DECISION}}
+    </div>
+  </div>
+</section>
+
+
+<!-- ===========================================================================
+     TEIL 2 · MARKENBOTSCHAFT & TONALITÄT
+     =========================================================================== -->
+<section class="page part">
+  <div class="runninghead">
+    <span class="rh-title">{{COMPANY_NAME}} – Corporate Identity &amp; Design System</span>
+    <span>Seite 5</span>
+  </div>
+  <div class="page-body">
+    <span class="part-no">Teil 2</span>
+    <h2 class="part-title">Markenbotschaft &amp; Tonalität</h2>
+    <hr class="part-rule" />
+    <p class="subtitle">{{PART2_SUBTITLE}}</p>
+
+    <h3>2.1 Sprachstil</h3>
+    <table>
+      <thead><tr><th style="width:40%">Frage</th><th>Entscheidung</th></tr></thead>
+      <tbody>
+        <tr><td>Du oder Sie?</td><td>{{STYLE_ADDRESS}}</td></tr>
+        <tr><td>Fachlich oder einfach?</td><td>{{STYLE_TECHNICAL}}</td></tr>
+        <tr><td>Direkt oder erklärend?</td><td>{{STYLE_DIRECT}}</td></tr>
+        <tr><td>Emotional oder sachlich?</td><td>{{STYLE_EMOTIONAL}}</td></tr>
+        <tr><td>Kurz oder ausführlich?</td><td>{{STYLE_LENGTH}}</td></tr>
+        <tr><td>Premium, technisch, beratend …?</td><td>{{STYLE_CHARACTER}}</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 Messaging-System</h3>
+    <table>
+      <thead><tr><th style="width:28%">Baustein</th><th>Empfehlung</th></tr></thead>
+      <tbody>
+        <tr><td>Markenessenz</td><td><strong>{{BRAND_ESSENCE}}</strong></td></tr>
+        <tr><td>Deutscher Leitgedanke</td><td>{{GERMAN_GUIDING_IDEA}}</td></tr>
+        <tr><td>Hauptclaim</td><td>{{MAIN_CLAIM}}</td></tr>
+        <tr><td>Subclaim</td><td>{{SUBCLAIM}}</td></tr>
+        <tr><td>Elevator Pitch</td><td>{{ELEVATOR_PITCH}}</td></tr>
+        <tr><td>Tonalität</td><td>{{TONE_OF_VOICE}}</td></tr>
+      </tbody>
+    </table>
+
+    <h3>CTA- und Microcopy-System</h3>
+    <table>
+      <thead><tr><th>Kontext</th><th>Primary CTA</th><th>Secondary CTA</th><th>Hinweis</th></tr></thead>
+      <tbody>
+        <tr><td>Startseite</td><td>{{CTA_HOME_PRIMARY}}</td><td>{{CTA_HOME_SECONDARY}}</td><td>{{CTA_HOME_HINT}}</td></tr>
+        <tr><td>Leistungsseiten</td><td>{{CTA_SERVICE_PRIMARY}}</td><td>{{CTA_SERVICE_SECONDARY}}</td><td>{{CTA_SERVICE_HINT}}</td></tr>
+        <tr><td>Knowledge Center</td><td>{{CTA_KNOWLEDGE_PRIMARY}}</td><td>{{CTA_KNOWLEDGE_SECONDARY}}</td><td>{{CTA_KNOWLEDGE_HINT}}</td></tr>
+        <tr><td>Kontakt</td><td>{{CTA_CONTACT_PRIMARY}}</td><td>{{CTA_CONTACT_SECONDARY}}</td><td>{{CTA_CONTACT_HINT}}</td></tr>
+        <tr><td>Formular-Fehler</td><td>{{FORM_ERROR_MESSAGE}}</td><td>–</td><td>{{FORM_ERROR_HINT}}</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Beispiel für Hero-Copy</h3>
+    <div class="card">
+      <h4 style="margin-top:0">{{HERO_HEADLINE}}</h4>
+      <p>{{HERO_SUBHEADLINE}}</p>
+      <p style="font-family:var(--font-mono);font-size:14px;color:var(--color-accent)">{{HERO_PROOF_LINE}}</p>
+      <div class="btn-row">
+        <span class="btn btn-primary">{{HERO_PRIMARY_CTA}}</span>
+        <span class="btn btn-secondary">{{HERO_SECONDARY_CTA}}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===========================================================================
+     TEIL 3 · VISUELLE MARKENBASIS
+     =========================================================================== -->
+<section class="page part">
+  <div class="runninghead">
+    <span class="rh-title">{{COMPANY_NAME}} – Corporate Identity &amp; Design System</span>
+    <span>Seite 7</span>
+  </div>
+  <div class="page-body">
+    <span class="part-no">Teil 3</span>
+    <h2 class="part-title">Visuelle Markenbasis</h2>
+    <hr class="part-rule" />
+    <p class="subtitle">{{PART3_SUBTITLE}}</p>
+
+    <h3>3.1 Logo-System</h3>
+    <p>{{LOGO_INTRO}}</p>
+
+    <!-- Live-Vorschau: Signet aus den Master-Farben, Wortmarke + Claim -->
+    <div class="logo-preview">
+      <span class="logo-node"></span>
+      <span><span class="logo-word">{{COMPANY_NAME}}</span><br><span class="logo-claim">{{MAIN_CLAIM}}</span></span>
+    </div>
+    <div class="logo-preview dark">
+      <span class="logo-node"></span>
+      <span><span class="logo-word">{{COMPANY_NAME}}</span><br><span class="logo-claim">{{MAIN_CLAIM}}</span></span>
+    </div>
+
+    <table>
+      <thead><tr><th style="width:30%">Logo-Element</th><th>Vorgabe</th></tr></thead>
+      <tbody>
+        <tr><td>Hauptlogo</td><td>{{LOGO_MAIN}}</td></tr>
+        <tr><td>Alternatives Logo</td><td>{{LOGO_ALT}}</td></tr>
+        <tr><td>Dunkler Hintergrund</td><td>{{LOGO_ON_DARK}}</td></tr>
+        <tr><td>Heller Hintergrund</td><td>{{LOGO_ON_LIGHT}}</td></tr>
+        <tr><td>Icon / Signet</td><td>{{LOGO_ICON}}</td></tr>
+        <tr><td>Mindestgröße</td><td>{{LOGO_MIN_SIZE}}</td></tr>
+        <tr><td>Schutzraum</td><td>{{LOGO_CLEARSPACE}}</td></tr>
+        <tr><td>Verboten</td><td>{{LOGO_FORBIDDEN}}</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3.2 Farbwelt</h3>
+    <p>{{COLOR_INTRO}}</p>
+    <table>
+      <thead><tr><th>Swatch</th><th>Name</th><th>HEX</th><th>Einsatz</th><th>Token</th></tr></thead>
+      <tbody>
+        <tr class="swatch-row"><td><span class="swatch" style="background:var(--color-primary)"></span></td>
+          <td>{{COLOR_PRIMARY_NAME}}</td><td><code>{{COLOR_PRIMARY}}</code></td><td>{{COLOR_PRIMARY_USE}}</td><td><code>--color-primary</code></td></tr>
+        <tr class="swatch-row"><td><span class="swatch" style="background:var(--color-secondary)"></span></td>
+          <td>{{COLOR_SECONDARY_NAME}}</td><td><code>{{COLOR_SECONDARY}}</code></td><td>{{COLOR_SECONDARY_USE}}</td><td><code>--color-secondary</code></td></tr>
+        <tr class="swatch-row"><td><span class="swatch" style="background:var(--color-accent)"></span></td>
+          <td>{{COLOR_ACCENT_NAME}}</td><td><code>{{COLOR_ACCENT}}</code></td><td>{{COLOR_ACCENT_USE}}</td><td><code>--color-accent</code></td></tr>
+        <tr class="swatch-row"><td><span class="swatch" style="background:var(--color-heading)"></span></td>
+          <td>{{COLOR_HEADING_NAME}}</td><td><code>{{COLOR_HEADING}}</code></td><td>{{COLOR_HEADING_USE}}</td><td><code>--color-heading</code></td></tr>
+        <tr class="swatch-row"><td><span class="swatch" style="background:var(--color-text)"></span></td>
+          <td>{{COLOR_TEXT_NAME}}</td><td><code>{{COLOR_TEXT}}</code></td><td>{{COLOR_TEXT_USE}}</td><td><code>--color-text</code></td></tr>
+        <tr class="swatch-row"><td><span class="swatch" style="background:var(--color-bg)"></span></td>
+          <td>{{COLOR_BG_NAME}}</td><td><code>{{COLOR_BG}}</code></td><td>{{COLOR_BG_USE}}</td><td><code>--color-bg</code></td></tr>
+        <tr class="swatch-row"><td><span class="swatch" style="background:var(--color-bg-alt)"></span></td>
+          <td>{{COLOR_BG_ALT_NAME}}</td><td><code>{{COLOR_BG_ALT}}</code></td><td>{{COLOR_BG_ALT_USE}}</td><td><code>--color-bg-alt</code></td></tr>
+        <tr class="swatch-row"><td><span class="swatch" style="background:var(--color-dark)"></span></td>
+          <td>{{COLOR_DARK_NAME}}</td><td><code>{{COLOR_DARK}}</code></td><td>{{COLOR_DARK_USE}}</td><td><code>--color-dark</code></td></tr>
+      </tbody>
+    </table>
+
+    <h4>Funktionale Farben</h4>
+    <table>
+      <thead><tr><th>Swatch</th><th>Funktion</th><th>HEX</th><th>Einsatz</th></tr></thead>
+      <tbody>
+        <tr class="swatch-row"><td><span class="swatch" style="background:var(--color-success)"></span></td><td>Success</td><td><code>{{COLOR_SUCCESS}}</code></td><td>{{COLOR_SUCCESS_USE}}</td></tr>
+        <tr class="swatch-row"><td><span class="swatch" style="background:var(--color-warning)"></span></td><td>Warning</td><td><code>{{COLOR_WARNING}}</code></td><td>{{COLOR_WARNING_USE}}</td></tr>
+        <tr class="swatch-row"><td><span class="swatch" style="background:var(--color-error)"></span></td><td>Error</td><td><code>{{COLOR_ERROR}}</code></td><td>{{COLOR_ERROR_USE}}</td></tr>
+        <tr class="swatch-row"><td><span class="swatch" style="background:var(--color-info)"></span></td><td>Info</td><td><code>{{COLOR_INFO}}</code></td><td>{{COLOR_INFO_USE}}</td></tr>
+        <tr class="swatch-row"><td><span class="swatch" style="background:var(--color-line)"></span></td><td>Line</td><td><code>{{COLOR_LINE}}</code></td><td>{{COLOR_LINE_USE}}</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout"><strong>Farbregel.</strong> {{COLOR_RULE}}</div>
+
+    <h3>3.3 Typografie</h3>
+    <p>{{TYPO_INTRO}}</p>
+    <table>
+      <thead><tr><th>Ebene</th><th>Font</th><th>Desktop</th><th>Tablet</th><th>Mobile</th><th>Gewicht / Linie</th></tr></thead>
+      <tbody>
+        <tr><td>H1</td><td>{{FONT_HEADING}}</td><td>48 px</td><td>40 px</td><td>32 px</td><td>700 / 1.10</td></tr>
+        <tr><td>H2</td><td>{{FONT_HEADING}}</td><td>36 px</td><td>30 px</td><td>26 px</td><td>650 / 1.18</td></tr>
+        <tr><td>H3</td><td>{{FONT_HEADING}}</td><td>26 px</td><td>24 px</td><td>22 px</td><td>650 / 1.25</td></tr>
+        <tr><td>H4</td><td>{{FONT_HEADING}}</td><td>20 px</td><td>19 px</td><td>18 px</td><td>600 / 1.30</td></tr>
+        <tr><td>Body</td><td>{{FONT_BODY}}</td><td>17 px</td><td>16 px</td><td>16 px</td><td>400 / 1.65</td></tr>
+        <tr><td>Small</td><td>{{FONT_BODY}}</td><td>14 px</td><td>14 px</td><td>13 px</td><td>400 / 1.45</td></tr>
+        <tr><td>Buttons</td><td>{{FONT_BODY}}</td><td>15 px</td><td>15 px</td><td>15 px</td><td>650 / 1.0, keine Versalien</td></tr>
+        <tr><td>Mono / Data</td><td>{{FONT_MONO}}</td><td>14 px</td><td>13 px</td><td>12 px</td><td>500 / 1.45</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>Typografie-Regeln.</strong> {{TYPO_RULES}}</div>
+  </div>
+</section>
+
+
+<!-- ===========================================================================
+     TEIL 4 · LAYOUT-SYSTEM
+     =========================================================================== -->
+<section class="page part">
+  <div class="runninghead">
+    <span class="rh-title">{{COMPANY_NAME}} – Corporate Identity &amp; Design System</span>
+    <span>Seite 10</span>
+  </div>
+  <div class="page-body">
+    <span class="part-no">Teil 4</span>
+    <h2 class="part-title">Layout-System</h2>
+    <hr class="part-rule" />
+    <p class="subtitle">Container, Grid, Abstände und visuelle Architektur</p>
+
+    <h3>4.1 Seitenbreite und Container</h3>
+    <table>
+      <thead><tr><th>Element</th><th>Wert</th><th>Begründung</th></tr></thead>
+      <tbody>
+        <tr><td>Max. Content Width</td><td><code>{{MAX_CONTENT_WIDTH}}</code></td><td>B2B-Inhalte ohne unruhige Zeilenlängen.</td></tr>
+        <tr><td>Schmale Textbreite</td><td><code>{{NARROW_TEXT_WIDTH}}</code></td><td>Lesbarkeit für Fachtexte und Case Studies.</td></tr>
+        <tr><td>Desktop Padding</td><td>64–96 px oben/unten; 32 px seitlich</td><td>Ruhige Premium-Anmutung.</td></tr>
+        <tr><td>Tablet Padding</td><td>48–64 px oben/unten; 24 px seitlich</td><td>Kompakt ohne Enge.</td></tr>
+        <tr><td>Mobile Padding</td><td>40–56 px oben/unten; 20 px seitlich</td><td>Conversion-Fokus und Lesbarkeit.</td></tr>
+        <tr><td>Grid</td><td>12 / 6 / 4 Spalten</td><td>Kontrolle für fachliche Content-Module.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>4.2 Grid-System</h3>
+    <table>
+      <thead><tr><th>Grid</th><th>Vorgabe</th><th>Einsatz</th></tr></thead>
+      <tbody>
+        <tr><td>1 Spalte</td><td>Schmale Textbreite</td><td>Artikel, ausführliche Fachinhalte</td></tr>
+        <tr><td>2 Spalten</td><td>50/50 oder 60/40</td><td>Text/Bild, Problem/Lösung, Ansprechpartner</td></tr>
+        <tr><td>3 Spalten</td><td>Gleiche Breite, 24–32 px Gap</td><td>Leistungen, Vorteile, Prozess-Stufen</td></tr>
+        <tr><td>4 Spalten</td><td>Nur bei kurzen Inhalten</td><td>Kennzahlen, Trust-Bar, Mini-Features</td></tr>
+        <tr><td>Responsive</td><td>3 → 2 → 1; 4 → 2 → 1</td><td>Keine zu schmalen Cards auf Mobile</td></tr>
+      </tbody>
+    </table>
+
+    <h3>4.3 Abstände und Spacing-System</h3>
+    <p>Eine 4/8-basierte Skala. In Astra/Elementor dürfen keine Zufallswerte (37 px, 71 px) verwendet werden.</p>
+    <table>
+      <thead><tr><th>Token</th><th>Wert</th><th>Einsatz</th></tr></thead>
+      <tbody>
+        <tr><td><code>--space-2xs</code></td><td>4 px</td><td>Feinabstände, Icon-Korrekturen</td></tr>
+        <tr><td><code>--space-xs</code></td><td>8 px</td><td>Label zu Input, kleine Gruppen</td></tr>
+        <tr><td><code>--space-sm</code></td><td>12 px</td><td>Cards intern, Listenabstände</td></tr>
+        <tr><td><code>--space-md</code></td><td>16 px</td><td>Standardkomponenten</td></tr>
+        <tr><td><code>--space-lg</code></td><td>24 px</td><td>Absatzgruppen, Card Padding klein</td></tr>
+        <tr><td><code>--space-xl</code></td><td>32 px</td><td>Spaltenabstände, Card Padding Standard</td></tr>
+        <tr><td><code>--space-2xl</code></td><td>48 px</td><td>Sektionen kompakt, CTA-Abstand</td></tr>
+        <tr><td><code>--space-3xl</code></td><td>64 px</td><td>Standard-Sektion Desktop</td></tr>
+        <tr><td><code>--space-4xl</code></td><td>96 px</td><td>Hero/Trust-Bereiche</td></tr>
+        <tr><td><code>--space-5xl</code></td><td>128 px</td><td>Große Hero-Bereiche</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- ===========================================================================
+     TEIL 5 · UI-ELEMENTE & KOMPONENTEN
+     =========================================================================== -->
+<section class="page part">
+  <div class="runninghead">
+    <span class="rh-title">{{COMPANY_NAME}} – Corporate Identity &amp; Design System</span>
+    <span>Seite 12</span>
+  </div>
+  <div class="page-body">
+    <span class="part-no">Teil 5</span>
+    <h2 class="part-title">UI-Elemente &amp; Komponenten</h2>
+    <hr class="part-rule" />
+    <p class="subtitle">Buttons, Links, Formulare, Cards, Icons, Bilder und Grafiken</p>
+
+    <h3>5.1 Buttons</h3>
+    <div class="btn-row">
+      <span class="btn btn-primary">{{HERO_PRIMARY_CTA}}</span>
+      <span class="btn btn-secondary">{{HERO_SECONDARY_CTA}}</span>
+    </div>
+    <table>
+      <thead><tr><th>Button</th><th>Look</th><th>Werte</th></tr></thead>
+      <tbody>
+        <tr><td>Primary</td><td>Primärfläche, weißer Text</td><td>BG <code>var(--color-primary)</code>, Hover <code>var(--color-accent)</code>, Radius 6 px, Padding 15/24 px</td></tr>
+        <tr><td>Secondary</td><td>Weiße Fläche, Border</td><td>Border + Text <code>var(--color-primary)</code>, Hover <code>var(--color-bg-alt)</code></td></tr>
+        <tr><td>Tertiary / Text</td><td>Nur Text mit Linie/Arrow</td><td>Text <code>var(--color-secondary)</code>, Hover <code>var(--color-primary)</code></td></tr>
+        <tr><td>On Dark</td><td>Weiße oder Akzentfläche</td><td>BG #FFFFFF oder <code>var(--color-accent)</code></td></tr>
+        <tr><td>Disabled</td><td>Low contrast, kein Schatten</td><td>BG <code>var(--color-line)</code>, Text <code>var(--color-muted)</code></td></tr>
+        <tr><td>Mobile</td><td>Optional 100 % Breite</td><td>min-height 48 px</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5.2 Links</h3>
+    <table>
+      <thead><tr><th>Link-Typ</th><th>Vorgabe</th></tr></thead>
+      <tbody>
+        <tr><td>Fließtext</td><td>{{LINK_BODY}}</td></tr>
+        <tr><td>Navigation</td><td>{{LINK_NAV}}</td></tr>
+        <tr><td>Footer</td><td>{{LINK_FOOTER}}</td></tr>
+        <tr><td>Cards</td><td>{{LINK_CARDS}}</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5.3 Formulare</h3>
+    <table>
+      <thead><tr><th>Element</th><th>Vorgabe</th></tr></thead>
+      <tbody>
+        <tr><td>Input-Hintergrund</td><td>#FFFFFF; auf Dunkel <code>var(--color-bg-alt)</code></td></tr>
+        <tr><td>Rahmen / Fokus</td><td>1 px <code>var(--color-line)</code>; Fokus 2 px <code>var(--color-accent)</code></td></tr>
+        <tr><td>Radius</td><td>6 px</td></tr>
+        <tr><td>Label</td><td>14 px, 600; immer sichtbar, nicht nur Placeholder</td></tr>
+        <tr><td>Fehlerzustand</td><td>Rahmen <code>var(--color-error)</code>, Meldung darunter 13 px</td></tr>
+        <tr><td>Erfolg</td><td>Kurze Bestätigung in <code>var(--color-success)</code></td></tr>
+        <tr><td>Abstände</td><td>16 px zwischen Feldern, 24 px vor Submit</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5.4 Karten und Boxen</h3>
+    <div class="card-grid cols-3">
+      <div class="card"><span class="card-tag">Service</span><h4>{{CARD_1_TITLE}}</h4><p>{{CARD_1_TEXT}}</p></div>
+      <div class="card"><span class="card-tag">Service</span><h4>{{CARD_2_TITLE}}</h4><p>{{CARD_2_TEXT}}</p></div>
+      <div class="card"><span class="card-tag">Service</span><h4>{{CARD_3_TITLE}}</h4><p>{{CARD_3_TEXT}}</p></div>
+    </div>
+
+    <h3>5.5 Icons</h3>
+    <table>
+      <thead><tr><th>Kriterium</th><th>Vorgabe</th></tr></thead>
+      <tbody>
+        <tr><td>Stil</td><td>{{ICON_STYLE}}</td></tr>
+        <tr><td>Strichstärke</td><td>{{ICON_STROKE}}</td></tr>
+        <tr><td>Größe</td><td>{{ICON_SIZE}}</td></tr>
+        <tr><td>Farbe</td><td>Primär/Sekundär, Akzent für aktive Marker</td></tr>
+        <tr><td>Einsatz</td><td>{{ICON_TOPICS}}</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5.6 Bilder und Bildsprache</h3>
+    <div class="img-ph">{{IMAGE_HERO_PLACEHOLDER}}</div>
+    <table>
+      <thead><tr><th>Element</th><th>Vorgabe</th></tr></thead>
+      <tbody>
+        <tr><td>Fotostil</td><td>{{IMG_PHOTO_STYLE}}</td></tr>
+        <tr><td>Farbstimmung</td><td>{{IMG_COLOR_MOOD}}</td></tr>
+        <tr><td>Bildformate</td><td>{{IMG_FORMATS}}</td></tr>
+        <tr><td>Overlays</td><td>{{IMG_OVERLAYS}}</td></tr>
+        <tr><td>Bildradius</td><td>6–10 px</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>Bildregel für B2B.</strong> {{IMG_RULE}}</div>
+
+    <h3>5.7 Illustrationen und Grafiken</h3>
+    <table>
+      <thead><tr><th>Element</th><th>Vorgabe</th></tr></thead>
+      <tbody>
+        <tr><td>Illustrationsstil</td><td>{{ILLU_STYLE}}</td></tr>
+        <tr><td>Diagramme</td><td>{{ILLU_DIAGRAMS}}</td></tr>
+        <tr><td>Muster</td><td>{{ILLU_PATTERN}}</td></tr>
+        <tr><td>Animation</td><td>{{ILLU_ANIMATION}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- ===========================================================================
+     TEIL 6 · INTERAKTION, ECKEN & SCHATTEN
+     =========================================================================== -->
+<section class="page part">
+  <div class="runninghead">
+    <span class="rh-title">{{COMPANY_NAME}} – Corporate Identity &amp; Design System</span>
+    <span>Seite 15</span>
+  </div>
+  <div class="page-body">
+    <span class="part-no">Teil 6</span>
+    <h2 class="part-title">Interaktion, Ecken &amp; Schatten</h2>
+    <hr class="part-rule" />
+    <p class="subtitle">Mikrointeraktionen, Fokus-Zustände, Border Radius und Tiefenwirkung</p>
+
+    <h3>Interaktionsdesign</h3>
+    <table>
+      <thead><tr><th>Zustand</th><th>Vorgabe</th></tr></thead>
+      <tbody>
+        <tr><td>Hover Buttons</td><td>Farbwechsel + max. 1 px Y-Translation, 180 ms ease-out</td></tr>
+        <tr><td>Card Hover</td><td>Dezenter Schatten, Border von Line zu Akzent</td></tr>
+        <tr><td>Fokus</td><td>Immer sichtbar: 2 px Akzent-Outline mit 2 px Offset</td></tr>
+        <tr><td>Sticky Header</td><td>{{INTERACTION_STICKY}}</td></tr>
+        <tr><td>Ladezustände</td><td>Skeletons oder dezente Spinner in Akzentfarbe</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Ränder, Ecken und Schatten</h3>
+    <table>
+      <thead><tr><th>Token</th><th>Wert</th><th>Einsatz</th></tr></thead>
+      <tbody>
+        <tr><td><code>--radius-sm</code></td><td>4 px</td><td>Badges, kleine Inputs</td></tr>
+        <tr><td><code>--radius-md</code></td><td>6 px</td><td>Buttons, Formularfelder</td></tr>
+        <tr><td><code>--radius-lg</code></td><td>10 px</td><td>Cards, Callouts</td></tr>
+        <tr><td><code>--radius-xl</code></td><td>16 px</td><td>Hero-Visuals, große Module</td></tr>
+        <tr><td><code>--shadow-soft</code></td><td>0 10px 30px (Primär 8 %)</td><td>Cards, Dropdowns</td></tr>
+        <tr><td><code>--shadow-hover</code></td><td>0 16px 42px (Primär 12 %)</td><td>Card Hover</td></tr>
+        <tr><td><code>--shadow-header</code></td><td>0 6px 24px (Primär 8 %)</td><td>Sticky Header</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>Formensprache.</strong> {{SHAPE_INTERPRETATION}}</div>
+  </div>
+</section>
+
+
+<!-- ===========================================================================
+     TEIL 7 · RESPONSIVE & ACCESSIBILITY
+     =========================================================================== -->
+<section class="page part">
+  <div class="runninghead">
+    <span class="rh-title">{{COMPANY_NAME}} – Corporate Identity &amp; Design System</span>
+    <span>Seite 16</span>
+  </div>
+  <div class="page-body">
+    <span class="part-no">Teil 7</span>
+    <h2 class="part-title">Responsive &amp; Accessibility</h2>
+    <hr class="part-rule" />
+    <p class="subtitle">Professionelle Wirkung auf Desktop, Tablet, Mobile und für alle Nutzer</p>
+
+    <h3>Responsive Design</h3>
+    <table>
+      <thead><tr><th>Bereich</th><th>Desktop</th><th>Tablet</th><th>Mobile</th></tr></thead>
+      <tbody>
+        <tr><td>Header</td><td>Logo links, Menü, CTA rechts</td><td>kompaktes Menü</td><td>Burger, optional Sticky CTA</td></tr>
+        <tr><td>Hero</td><td>2 Spalten 55/45</td><td>1–2 Spalten</td><td>Headline, Beweis, CTA, dann Bild</td></tr>
+        <tr><td>Cards</td><td>3 Spalten</td><td>2 Spalten</td><td>1 Spalte</td></tr>
+        <tr><td>Formulare</td><td>2 Spalten möglich</td><td>1–2 Spalten</td><td>1 Spalte, große Tap-Zonen</td></tr>
+        <tr><td>Footer</td><td>4 Spalten</td><td>2 Spalten</td><td>Akkordeon / gestapelt</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Accessibility und Usability</h3>
+    <table>
+      <thead><tr><th>Prüfpunkt</th><th>Vorgabe</th></tr></thead>
+      <tbody>
+        <tr><td>Kontrast</td><td>Mindestens WCAG AA; CTAs und Text auf Primärfläche separat prüfen.</td></tr>
+        <tr><td>Schriftgrößen</td><td>Body nicht unter 16 px auf Mobile; Zeilenhöhe ≥ 1.5.</td></tr>
+        <tr><td>Fokus-Zustände</td><td>Tastaturfokus immer sichtbar, nicht nur farblich.</td></tr>
+        <tr><td>Buttons</td><td>Mindesthöhe 44–48 px; klare Labels.</td></tr>
+        <tr><td>Navigation</td><td>Maximal 5–7 Hauptpunkte.</td></tr>
+        <tr><td>H-Struktur</td><td>Eine H1 pro Seite, danach logisch H2/H3.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>Mobile Conversion Flow.</strong> {{MOBILE_CONVERSION_NOTE}}</div>
+  </div>
+</section>
+
+
+<!-- ===========================================================================
+     TEIL 8 · ASTRA & ELEMENTOR UMSETZUNG
+     =========================================================================== -->
+<section class="page part">
+  <div class="runninghead">
+    <span class="rh-title">{{COMPANY_NAME}} – Corporate Identity &amp; Design System</span>
+    <span>Seite 17</span>
+  </div>
+  <div class="page-body">
+    <span class="part-no">Teil 8</span>
+    <h2 class="part-title">{{PLATFORM}} Umsetzung</h2>
+    <hr class="part-rule" />
+    <p class="subtitle">Zentrale Designsteuerung statt Einzelseiten-Chaos</p>
+
+    <h3>8.1 Global Setup</h3>
+    <table>
+      <thead><tr><th>Bereich</th><th>Einstellung</th></tr></thead>
+      <tbody>
+        <tr><td>Global Colors</td><td>1 Primary, 2 Secondary, 3 Accent, 4 Heading, 5 Text, 6 BG, 7 BG-Alt, 8 Dark</td></tr>
+        <tr><td>Global Typography</td><td>Body {{FONT_BODY}} 17/1.65; H1–H6 nach Typografie-System; Buttons 15/650</td></tr>
+        <tr><td>Container</td><td>max. {{MAX_CONTENT_WIDTH}}</td></tr>
+        <tr><td>Buttons</td><td>Radius 6 px, Padding 15/24 px, Primary, Hover Akzent</td></tr>
+        <tr><td>Header</td><td>{{HEADER_SETUP}}</td></tr>
+        <tr><td>Footer</td><td>{{FOOTER_SETUP}}</td></tr>
+      </tbody>
+    </table>
+
+    <h3>8.2 Header-Empfehlung</h3>
+    <table>
+      <thead><tr><th>Bereich</th><th>Vorgabe</th></tr></thead>
+      <tbody>
+        <tr><td>Logo</td><td>{{HEADER_LOGO}}</td></tr>
+        <tr><td>Navigation</td><td>{{NAV_ITEMS}}</td></tr>
+        <tr><td>CTA</td><td>{{HEADER_CTA}}</td></tr>
+        <tr><td>Sticky</td><td>{{HEADER_STICKY}}</td></tr>
+      </tbody>
+    </table>
+
+    <h3>8.3 Footer-Empfehlung</h3>
+    <table>
+      <thead><tr><th>Bereich</th><th>Vorgabe</th></tr></thead>
+      <tbody>
+        <tr><td>Spalten</td><td>{{FOOTER_COLUMNS}}</td></tr>
+        <tr><td>Kontakt</td><td>{{FOOTER_CONTACT}}</td></tr>
+        <tr><td>Rechtliches</td><td>{{FOOTER_LEGAL}}</td></tr>
+        <tr><td>Abschlusszeile</td><td>{{FOOTER_TAGLINE}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- ===========================================================================
+     TEIL 9 · CSS DESIGN TOKENS
+     =========================================================================== -->
+<section class="page part">
+  <div class="runninghead">
+    <span class="rh-title">{{COMPANY_NAME}} – Corporate Identity &amp; Design System</span>
+    <span>Seite 19</span>
+  </div>
+  <div class="page-body">
+    <span class="part-no">Teil 9</span>
+    <h2 class="part-title">CSS Design Tokens</h2>
+    <hr class="part-rule" />
+    <p class="subtitle">Technische Brücke zwischen Corporate Design, Plattform und KI-Layouts</p>
+
+    <pre><code>:root {
+  --color-primary:   {{COLOR_PRIMARY}};
+  --color-secondary: {{COLOR_SECONDARY}};
+  --color-accent:    {{COLOR_ACCENT}};
+  --color-heading:   {{COLOR_HEADING}};
+  --color-text:      {{COLOR_TEXT}};
+  --color-muted:     {{COLOR_MUTED}};
+  --color-line:      {{COLOR_LINE}};
+  --color-bg:        {{COLOR_BG}};
+  --color-bg-alt:    {{COLOR_BG_ALT}};
+  --color-dark:      {{COLOR_DARK}};
+
+  --font-heading: "{{FONT_HEADING}}", system-ui, sans-serif;
+  --font-body:    "{{FONT_BODY}}", system-ui, sans-serif;
+  --font-mono:    "{{FONT_MONO}}", ui-monospace, monospace;
+
+  --radius-sm: 4px;  --radius-md: 6px;  --radius-lg: 10px; --radius-xl: 16px;
+  --space-xs: 8px;   --space-sm: 12px;  --space-md: 16px;  --space-lg: 24px;
+  --space-xl: 32px;  --space-2xl: 48px; --space-3xl: 64px; --space-4xl: 96px;
+
+  --shadow-soft:  0 10px 30px color-mix(in srgb, var(--color-primary) 8%, transparent);
+  --shadow-hover: 0 16px 42px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.button-primary {
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: 15px 24px;
+  font-weight: 650;
+  transition: all .18s ease-out;
+}
+.button-primary:hover {
+  background: var(--color-accent);
+  transform: translateY(-1px);
+}</code></pre>
+
+    <h3>Klassen-Namenskonvention</h3>
+    <table>
+      <thead><tr><th>Klasse</th><th>Einsatz</th></tr></thead>
+      <tbody>
+        <tr><td><code>{{CLASS_PREFIX}}-section</code></td><td>Standard-Sektion mit systematischem Padding</td></tr>
+        <tr><td><code>{{CLASS_PREFIX}}-section-dark</code></td><td>Dunkle Premium-Sektion</td></tr>
+        <tr><td><code>{{CLASS_PREFIX}}-card</code></td><td>Standard Card für Leistungen, Wissen, Ansprechpartner</td></tr>
+        <tr><td><code>{{CLASS_PREFIX}}-trustbar</code></td><td>Trust- und Proof-Element</td></tr>
+        <tr><td><code>{{CLASS_PREFIX}}-form</code></td><td>Formularcontainer mit einheitlichen Abständen</td></tr>
+        <tr><td><code>{{CLASS_PREFIX}}-kicker</code></td><td>Kleine Vorzeile in Akzentfarbe</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- ===========================================================================
+     TEIL 10 · KI-ARTEFAKT
+     =========================================================================== -->
+<section class="page part">
+  <div class="runninghead">
+    <span class="rh-title">{{COMPANY_NAME}} – Corporate Identity &amp; Design System</span>
+    <span>Seite 20</span>
+  </div>
+  <div class="page-body">
+    <span class="part-no">Teil 10</span>
+    <h2 class="part-title">KI-Artefakt</h2>
+    <hr class="part-rule" />
+    <p class="subtitle">Strukturierte Vorgaben für spätere Design-, Text- und Website-Schritte</p>
+
+    <h3>10.1 Wiederverwendbarer KI-Kontext</h3>
+    <pre><code>brand_artifact:
+  company: "{{COMPANY_LEGAL_NAME}}"
+  status: "{{STATUS}}"
+  brand_essence: "{{BRAND_ESSENCE}}"
+  positioning: "{{AI_POSITIONING}}"
+  audience: [{{AI_AUDIENCE}}]
+  personality: [{{AI_PERSONALITY}}]
+  tone_of_voice:
+    language: "{{AI_LANGUAGE}}"
+    style: "{{AI_STYLE}}"
+  colors:
+    primary:    "{{COLOR_PRIMARY}}"
+    secondary:  "{{COLOR_SECONDARY}}"
+    accent:     "{{COLOR_ACCENT}}"
+    heading:    "{{COLOR_HEADING}}"
+    body:       "{{COLOR_TEXT}}"
+    background: "{{COLOR_BG}}"
+    dark:       "{{COLOR_DARK}}"
+  typography:
+    heading: "{{FONT_HEADING}}, 600-700"
+    body:    "{{FONT_BODY}}, 400"
+    mono:    "{{FONT_MONO}}"
+  layout:
+    max_content_width: "{{MAX_CONTENT_WIDTH}}"
+    narrow_text_width: "{{NARROW_TEXT_WIDTH}}"
+    grid: "12/6/4 columns desktop/tablet/mobile"
+  components:
+    buttons: "6px radius, 15x24px padding, primary fill, accent hover"
+    cards:   "white/alt background, 10px radius, soft shadow"
+    icons:   "{{ICON_STYLE}}"
+  imagery:
+    style: "{{IMG_PHOTO_STYLE}}"
+  implementation:
+    platform: "{{PLATFORM}}"
+    rule: "all design decisions must use global colors, fonts, spacing tokens"</code></pre>
+
+    <h3>10.2 Beispiel-Prompt für Folgeaufgaben</h3>
+    <pre><code>{{AI_EXAMPLE_PROMPT}}</code></pre>
+  </div>
+</section>
+
+
+<!-- ===========================================================================
+     TEIL 11 · ABDECKUNG & NÄCHSTE SCHRITTE
+     =========================================================================== -->
+<section class="page part">
+  <div class="runninghead">
+    <span class="rh-title">{{COMPANY_NAME}} – Corporate Identity &amp; Design System</span>
+    <span>Seite 22</span>
+  </div>
+  <div class="page-body">
+    <span class="part-no">Teil 11</span>
+    <h2 class="part-title">Abdeckung &amp; nächste Schritte</h2>
+    <hr class="part-rule" />
+
+    <h3>Abdeckung des Kundenfragebogens</h3>
+    <table>
+      <thead><tr><th>Anhang-Punkt</th><th>Abgedeckt in</th></tr></thead>
+      <tbody>
+        <tr><td>Strategische Markenbasis</td><td>Teil 1</td></tr>
+        <tr><td>Markenbotschaft und Tonalität</td><td>Teil 2</td></tr>
+        <tr><td>Logo, Farbwelt, Typografie</td><td>Teil 3</td></tr>
+        <tr><td>Layout-System</td><td>Teil 4</td></tr>
+        <tr><td>UI-Elemente &amp; Komponenten</td><td>Teil 5</td></tr>
+        <tr><td>Interaktion, Ecken &amp; Schatten</td><td>Teil 6</td></tr>
+        <tr><td>Responsive &amp; Accessibility</td><td>Teil 7</td></tr>
+        <tr><td>Plattform-Umsetzung</td><td>Teil 8</td></tr>
+        <tr><td>Design Tokens</td><td>Teil 9</td></tr>
+        <tr><td>KI-Artefakt</td><td>Teil 10</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Nächste praktische Schritte</h3>
+    <ol>
+      <li>{{NEXT_STEP_1}}</li>
+      <li>{{NEXT_STEP_2}}</li>
+      <li>{{NEXT_STEP_3}}</li>
+      <li>{{NEXT_STEP_4}}</li>
+      <li>{{NEXT_STEP_5}}</li>
+    </ol>
+
+    <div class="callout callout--primary">
+      <strong>Finale Design-Leitfrage.</strong> {{FINAL_DESIGN_QUESTION}}
+    </div>
+  </div>
+</section>
+
+
+<!--
+  ============================================================================
+  VOLLSTÄNDIGE PLATZHALTER-LISTE  (pro Kunde ausfüllen)
+  ============================================================================
+
+  >> FARBEN (im :root-Block · Master = PRIMARY + ACCENT) <<
+  {{COLOR_PRIMARY}}      {{COLOR_PRIMARY_NAME}}      {{COLOR_PRIMARY_USE}}
+  {{COLOR_ACCENT}}       {{COLOR_ACCENT_NAME}}       {{COLOR_ACCENT_USE}}
+  {{COLOR_SECONDARY}}    {{COLOR_SECONDARY_NAME}}    {{COLOR_SECONDARY_USE}}
+  {{COLOR_HEADING}}      {{COLOR_HEADING_NAME}}      {{COLOR_HEADING_USE}}
+  {{COLOR_TEXT}}         {{COLOR_TEXT_NAME}}         {{COLOR_TEXT_USE}}
+  {{COLOR_MUTED}}
+  {{COLOR_BG}}           {{COLOR_BG_NAME}}           {{COLOR_BG_USE}}
+  {{COLOR_BG_ALT}}       {{COLOR_BG_ALT_NAME}}       {{COLOR_BG_ALT_USE}}
+  {{COLOR_DARK}}         {{COLOR_DARK_NAME}}         {{COLOR_DARK_USE}}
+  {{COLOR_LINE}}         {{COLOR_LINE_USE}}
+  {{COLOR_SUCCESS}}      {{COLOR_SUCCESS_USE}}
+  {{COLOR_WARNING}}      {{COLOR_WARNING_USE}}
+  {{COLOR_ERROR}}        {{COLOR_ERROR_USE}}
+  {{COLOR_INFO}}         {{COLOR_INFO_USE}}
+
+  >> TYPOGRAFIE / LAYOUT <<
+  {{FONT_HEADING}}  {{FONT_BODY}}  {{FONT_MONO}}
+  {{MAX_CONTENT_WIDTH}}  {{NARROW_TEXT_WIDTH}}  {{CLASS_PREFIX}}
+
+  >> META / DECKBLATT <<
+  {{COMPANY_NAME}}  {{COMPANY_LEGAL_NAME}}  {{DOCUMENT_DATE}}  {{DOCUMENT_TAG}}
+  {{WORKFLOW_LABEL}}  {{COVER_SUBTITLE}}  {{PROJECT_GOAL}}  {{PLATFORM}}  {{STATUS}}
+
+  >> TEIL 0 · ZWECK <<
+  {{PURPOSE_INTRO}}  {{PURPOSE_DISCLAIMER}}
+  {{SOURCE_1_NAME}}  {{SOURCE_1_CONTEXT}}  {{SOURCE_2_NAME}}  {{SOURCE_2_CONTEXT}}  {{SOURCE_NOTE}}
+  {{WORKFLOW_STEP_1}} … {{WORKFLOW_STEP_6}}
+
+  >> TEIL 1 · STRATEGIE <<
+  {{PART1_SUBTITLE}}
+  {{BRAND_STANDS_FOR}}  {{BRAND_EXISTS_BECAUSE}}  {{PROBLEM_SOLVED}}  {{PROBLEM_FOR_WHOM}}
+  {{COMPETITIVE_ADVANTAGE}}  {{BRAND_VALUES}}  {{MARKET_ROLE}}
+  {{DIM1_DECISION}}/{{DIM1_CONSEQUENCE}} … {{DIM6_DECISION}}/{{DIM6_CONSEQUENCE}}
+  {{EMOTION_DECISION}}  {{EMOTION_CONSEQUENCE}}
+  {{DIFFERENTIATION}}  {{OBJECTIONS_TO_COUNTER}}  {{WHY_TRUST}}
+  {{VISIBLE_ARGUMENTS}}  {{REQUIRED_PROOFS}}  {{STRATEGIC_LEAD_DECISION}}
+
+  >> TEIL 2 · BOTSCHAFT <<
+  {{PART2_SUBTITLE}}
+  {{STYLE_ADDRESS}}  {{STYLE_TECHNICAL}}  {{STYLE_DIRECT}}  {{STYLE_EMOTIONAL}}  {{STYLE_LENGTH}}  {{STYLE_CHARACTER}}
+  {{BRAND_ESSENCE}}  {{GERMAN_GUIDING_IDEA}}  {{MAIN_CLAIM}}  {{SUBCLAIM}}  {{ELEVATOR_PITCH}}  {{TONE_OF_VOICE}}
+  {{CTA_HOME_PRIMARY/SECONDARY/HINT}}  {{CTA_SERVICE_*}}  {{CTA_KNOWLEDGE_*}}  {{CTA_CONTACT_*}}
+  {{FORM_ERROR_MESSAGE}}  {{FORM_ERROR_HINT}}
+  {{HERO_HEADLINE}}  {{HERO_SUBHEADLINE}}  {{HERO_PROOF_LINE}}  {{HERO_PRIMARY_CTA}}  {{HERO_SECONDARY_CTA}}
+
+  >> TEIL 3 · VISUELL <<
+  {{PART3_SUBTITLE}}  {{LOGO_INTRO}}  {{LOGO_MAIN}}  {{LOGO_ALT}}  {{LOGO_ON_DARK}}  {{LOGO_ON_LIGHT}}
+  {{LOGO_ICON}}  {{LOGO_MIN_SIZE}}  {{LOGO_CLEARSPACE}}  {{LOGO_FORBIDDEN}}
+  {{COLOR_INTRO}}  {{COLOR_RULE}}  {{TYPO_INTRO}}  {{TYPO_RULES}}
+
+  >> TEIL 5 · UI <<
+  {{LINK_BODY}}  {{LINK_NAV}}  {{LINK_FOOTER}}  {{LINK_CARDS}}
+  {{CARD_1_TITLE}}/{{CARD_1_TEXT}} … {{CARD_3_TITLE}}/{{CARD_3_TEXT}}
+  {{ICON_STYLE}}  {{ICON_STROKE}}  {{ICON_SIZE}}  {{ICON_TOPICS}}
+  {{IMAGE_HERO_PLACEHOLDER}}  {{IMG_PHOTO_STYLE}}  {{IMG_COLOR_MOOD}}  {{IMG_FORMATS}}  {{IMG_OVERLAYS}}  {{IMG_RULE}}
+  {{ILLU_STYLE}}  {{ILLU_DIAGRAMS}}  {{ILLU_PATTERN}}  {{ILLU_ANIMATION}}
+
+  >> TEIL 6 / 7 <<
+  {{INTERACTION_STICKY}}  {{SHAPE_INTERPRETATION}}  {{MOBILE_CONVERSION_NOTE}}
+
+  >> TEIL 8 · PLATTFORM <<
+  {{HEADER_SETUP}}  {{FOOTER_SETUP}}  {{HEADER_LOGO}}  {{NAV_ITEMS}}  {{HEADER_CTA}}  {{HEADER_STICKY}}
+  {{FOOTER_COLUMNS}}  {{FOOTER_CONTACT}}  {{FOOTER_LEGAL}}  {{FOOTER_TAGLINE}}
+
+  >> TEIL 10 · KI-ARTEFAKT <<
+  {{AI_POSITIONING}}  {{AI_AUDIENCE}}  {{AI_PERSONALITY}}  {{AI_LANGUAGE}}  {{AI_STYLE}}  {{AI_EXAMPLE_PROMPT}}
+
+  >> TEIL 11 · NÄCHSTE SCHRITTE <<
+  {{NEXT_STEP_1}} … {{NEXT_STEP_5}}  {{FINAL_DESIGN_QUESTION}}
+  ============================================================================
+-->
+
+</body>
+</html>

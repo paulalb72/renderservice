@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Logovorschläge zur Abstimmung – {{PROJECT_NAME}}</title>
+
+<!--
+  ============================================================================
+  LOGO-ABSTIMMUNG · WIEDERVERWENDBARE VORLAGE  (MakeMyPage Look & Feel)
+  ============================================================================
+  Zweck:   6 Logovorschläge gebündelt an den Kunden senden und abstimmen lassen.
+  Aufbau:  IMMER 6 Vorschläge (Karte 1–6). Struktur ist fix, nur {{PLATZHALTER}}
+           und die Logo-Grafiken werden ausgetauscht.
+  Logo:    Pro Karte {{LOGO_n_VISUAL}} durch ein <svg>…</svg> oder
+           <img src="logo-n.svg" alt=""> ersetzen (Vorschau auf Hell + Dunkel).
+  Farben:  Standardisiertes MakeMyPage-Blau – KEINE Kundenfarben nötig.
+  Platzhalter-Liste: siehe Kommentar am Dateiende.
+  ============================================================================
+-->
+
+<style>
+/* ---- MakeMyPage Design-Tokens (standardisiert) ------------------------- */
+:root{
+  --mmp-blue:#0C3DC8;     /* Markenblau: Logo-Box, Akzent-Titel, Kicker, Badges */
+  --mmp-ink:#14161F;      /* Tinten-Schwarz: Text & Headlines                   */
+  --mmp-muted:#6A7180;    /* Sekundärtext, Labels                               */
+  --mmp-line:#E7E9F1;     /* Haarlinien, Rahmen, Divider                        */
+  --mmp-bg:#FFFFFF;
+  --mmp-bg-alt:#F6F7FB;
+  --mmp-dark:#14161F;     /* Dunkel-Vorschaufläche für Logos                    */
+  --font: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --maxw: 920px;
+}
+
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+body{
+  font-family:var(--font); color:var(--mmp-ink); line-height:1.55;
+  background:#e9ebf1; padding:32px 16px;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---- Blatt / Seite ----------------------------------------------------- */
+.sheet{
+  max-width:var(--maxw); margin:0 auto; background:var(--mmp-bg);
+  padding:30px 44px 24px; box-shadow:0 10px 40px rgba(20,22,31,.10);
+}
+
+/* ---- Kopfzeile (Logo links · Titel rechts) ----------------------------- */
+.head{ display:flex; justify-content:space-between; align-items:flex-start; gap:24px; }
+.brandlogo{ height:42px; width:auto; display:block; border-radius:3px; }
+.head-right{ text-align:right; }
+.head-right .doc-kicker{ color:var(--mmp-blue); font-weight:700; letter-spacing:.26em;
+  font-size:13px; text-transform:uppercase; }
+.head-right .meta{ font-size:11.5px; color:var(--mmp-muted); margin-top:3px; }
+.head-right .meta b{ color:var(--mmp-ink); }
+
+.rule{ height:1px; background:var(--mmp-line); border:0; margin:13px 0; }
+
+/* ---- FÜR / VON --------------------------------------------------------- */
+.parties{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+.party .lbl{ font-size:10px; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--mmp-muted); margin-bottom:3px; }
+.party.von{ text-align:right; }
+.party .name{ font-weight:700; }
+.party .line{ font-size:11.5px; line-height:1.45; color:var(--mmp-muted); }
+
+/* ---- Titelblock -------------------------------------------------------- */
+.title{ margin-top:16px; font-size:25px; line-height:1.1; font-weight:700; color:#000; white-space:nowrap; }
+.intro{ margin-top:14px; font-size:15px; color:#2c3038; max-width:62ch; }
+
+/* ---- Abschnitts-Kicker mit Linie -------------------------------------- */
+.section-kicker{
+  display:flex; align-items:center; gap:16px; margin:16px 0 4px;
+  color:var(--mmp-blue); font-weight:700; letter-spacing:.24em;
+  font-size:13px; text-transform:uppercase;
+}
+.section-kicker::after{ content:""; flex:1; height:1px; background:var(--mmp-line); }
+
+.howto{ font-size:12px; color:var(--mmp-muted); margin:7px 0 13px; max-width:74ch; }
+
+/* ---- Raster der 6 Vorschläge ------------------------------------------ */
+.grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:13px; }
+
+.logo-card{
+  border:1px solid var(--mmp-line); border-radius:6px; overflow:visible;
+  display:flex; flex-direction:column; background:var(--mmp-bg);
+  break-inside:avoid; page-break-inside:avoid;
+}
+.lc-head{ display:flex; align-items:center; gap:9px; padding:8px 14px;
+  border-bottom:1px solid var(--mmp-line); border-radius:6px 6px 0 0; }
+.lc-no{ background:var(--mmp-blue); color:#fff; font-weight:700; font-size:13px;
+  width:26px; height:26px; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; flex:none; }
+.lc-name{ font-weight:700; font-size:13.5px; }
+
+/* Vorschau */
+.lc-preview{ min-height:84px; display:flex; }
+.pv-light{ flex:1; display:flex; align-items:center; justify-content:center;
+  padding:14px 16px; background:var(--mmp-bg-alt); }
+.pv-light svg, .pv-light img{ max-width:100%; height:auto; max-height:64px; }
+
+.lc-body{ padding:9px 14px; flex:1; }
+.lc-desc{ font-size:11.5px; line-height:1.4; color:#3a3f49; }
+
+
+/* ---- Abschluss --------------------------------------------------------- */
+.closing{ margin-top:14px; border:1px solid var(--mmp-line); border-radius:6px;
+  padding:11px 18px; background:var(--mmp-bg-alt); font-size:12.5px; }
+.closing p{ max-width:none; }
+.closing .decide{ margin-top:6px; font-weight:700; color:var(--mmp-blue); }
+
+/* ---- Footer ------------------------------------------------------------ */
+.foot{ margin-top:14px; padding-top:11px; border-top:1px solid var(--mmp-line);
+  text-align:center; font-size:11px; color:var(--mmp-muted); }
+.foot b{ color:var(--mmp-blue); }
+.foot .sep{ color:var(--mmp-line); margin:0 8px; }
+
+/* ---- Responsive -------------------------------------------------------- */
+@media (max-width:680px){
+  .sheet{ padding:28px 20px; }
+  .grid{ grid-template-columns:1fr; }
+  .parties{ grid-template-columns:1fr; }
+  .party.von{ text-align:left; }
+  .title{ font-size:19px; }
+}
+
+/* ---- Druck / PDF ------------------------------------------------------- */
+@page{ size:A4; margin:11mm 14mm; }
+@media print{
+  body{ background:#fff; padding:0; }
+  .sheet{ box-shadow:none; max-width:none; padding:0; }
+  .logo-card,.closing{ break-inside:avoid; }
+  .grid{ gap:8px; }
+  .lc-preview{ min-height:70px; }
+  .closing{ margin-top:8px; padding:9px 16px; }
+  .foot{ margin-top:8px; padding-top:8px; }
+  .section-kicker{ margin-top:12px; }
+  .howto{ margin:6px 0 10px; }
+}
+</style>
+</head>
+
+<body>
+<div class="sheet">
+
+  <!-- Kopfzeile -->
+  <div class="head">
+    <img class="brandlogo" src="data:image/jpeg;base64,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" alt="MakeMyPage" />
+    <div class="head-right">
+      <div class="doc-kicker">Logovorschläge</div>
+      <div class="meta">Projekt: <b>{{PROJECT_NAME}}</b></div>
+      <div class="meta">Nr.: <b>{{DOC_NUMBER}}</b> &nbsp;·&nbsp; Datum: <b>{{DOC_DATE}}</b></div>
+    </div>
+  </div>
+
+  <hr class="rule" />
+
+  <!-- FÜR / VON -->
+  <div class="parties">
+    <div class="party fuer">
+      <div class="lbl">Für</div>
+      <div class="name">{{CLIENT_COMPANY}}</div>
+      <div class="line">{{CLIENT_CONTACT}}</div>
+      <div class="line">{{CLIENT_STREET}}</div>
+      <div class="line">{{CLIENT_ZIP_CITY}}</div>
+    </div>
+    <div class="party von">
+      <div class="lbl">Von</div>
+      <div class="name">{{AGENCY_NAME}}</div>
+      <div class="line">{{AGENCY_STREET}}</div>
+      <div class="line">{{AGENCY_ZIP_CITY}}</div>
+    </div>
+  </div>
+
+  <!-- Titel -->
+  <h1 class="title">Logovorschläge zur Abstimmung</h1>
+
+  <!-- Abstimmungs-Hinweis -->
+  <div class="section-kicker">Zur Abstimmung</div>
+  <p class="howto">{{HOWTO}}</p>
+
+  <!-- 6 Vorschläge -->
+  <div class="grid">
+
+    <!-- Vorschlag 1 -->
+    <div class="logo-card">
+      <div class="lc-head"><span class="lc-no">1</span><span class="lc-name">{{LOGO_1_NAME}}</span></div>
+      <div class="lc-preview">
+        <div class="pv-light">{{LOGO_1_VISUAL}}</div>
+      </div>
+      <div class="lc-body"><p class="lc-desc">{{LOGO_1_DESC}}</p></div>
+    </div>
+
+    <!-- Vorschlag 2 -->
+    <div class="logo-card">
+      <div class="lc-head"><span class="lc-no">2</span><span class="lc-name">{{LOGO_2_NAME}}</span></div>
+      <div class="lc-preview">
+        <div class="pv-light">{{LOGO_2_VISUAL}}</div>
+      </div>
+      <div class="lc-body"><p class="lc-desc">{{LOGO_2_DESC}}</p></div>
+    </div>
+
+    <!-- Vorschlag 3 -->
+    <div class="logo-card">
+      <div class="lc-head"><span class="lc-no">3</span><span class="lc-name">{{LOGO_3_NAME}}</span></div>
+      <div class="lc-preview">
+        <div class="pv-light">{{LOGO_3_VISUAL}}</div>
+      </div>
+      <div class="lc-body"><p class="lc-desc">{{LOGO_3_DESC}}</p></div>
+    </div>
+
+    <!-- Vorschlag 4 -->
+    <div class="logo-card">
+      <div class="lc-head"><span class="lc-no">4</span><span class="lc-name">{{LOGO_4_NAME}}</span></div>
+      <div class="lc-preview">
+        <div class="pv-light">{{LOGO_4_VISUAL}}</div>
+      </div>
+      <div class="lc-body"><p class="lc-desc">{{LOGO_4_DESC}}</p></div>
+    </div>
+
+    <!-- Vorschlag 5 -->
+    <div class="logo-card">
+      <div class="lc-head"><span class="lc-no">5</span><span class="lc-name">{{LOGO_5_NAME}}</span></div>
+      <div class="lc-preview">
+        <div class="pv-light">{{LOGO_5_VISUAL}}</div>
+      </div>
+      <div class="lc-body"><p class="lc-desc">{{LOGO_5_DESC}}</p></div>
+    </div>
+
+    <!-- Vorschlag 6 -->
+    <div class="logo-card">
+      <div class="lc-head"><span class="lc-no">6</span><span class="lc-name">{{LOGO_6_NAME}}</span></div>
+      <div class="lc-preview">
+        <div class="pv-light">{{LOGO_6_VISUAL}}</div>
+      </div>
+      <div class="lc-body"><p class="lc-desc">{{LOGO_6_DESC}}</p></div>
+    </div>
+
+  </div><!-- /grid -->
+
+  <!-- Abschluss -->
+  <div class="closing">
+    <p>{{CLOSING_NOTE}}</p>
+    <p class="decide">Bitte wählen Sie Ihren favorisierten Vorschlag aus und geben Sie uns anschließend kurz Bescheid.</p>
+  </div>
+
+  <!-- Footer -->
+  <div class="foot">
+    <b>{{AGENCY_NAME}}</b><span class="sep">|</span>{{AGENCY_STREET}}<span class="sep">|</span>{{AGENCY_ZIP_CITY}}<span class="sep">|</span>Tel.: {{AGENCY_PHONE}}<span class="sep">|</span>{{AGENCY_MAIL}}
+  </div>
+
+</div><!-- /sheet -->
+
+<!--
+  ============================================================================
+  PLATZHALTER-LISTE (pro Abstimmung ausfüllen)
+  ============================================================================
+  KOPF / META
+    {{PROJECT_NAME}}  {{DOC_NUMBER}}  {{DOC_DATE}}
+  FÜR (Kunde)
+    {{CLIENT_COMPANY}}  {{CLIENT_CONTACT}}  {{CLIENT_STREET}}  {{CLIENT_ZIP_CITY}}
+  VON (Agentur)
+    {{AGENCY_NAME}}  {{AGENCY_STREET}}  {{AGENCY_ZIP_CITY}}  {{AGENCY_PHONE}}  {{AGENCY_MAIL}}
+  TITEL / EINLEITUNG
+    {{HOWTO}}
+  PRO VORSCHLAG 1–6 (immer 6)
+    {{LOGO_n_NAME}}          – Konzeptname
+    {{LOGO_n_DESC}}          – kurze Begründung / Idee
+    {{LOGO_n_VISUAL}}        – Logo als <svg>…</svg> oder <img>  (normale Vorschau)
+  ABSCHLUSS
+    {{CLOSING_NOTE}}
+  ============================================================================
+-->
+</body>
+</html>
