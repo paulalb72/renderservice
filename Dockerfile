@@ -7,8 +7,8 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Template MUSS mitkopiert werden (enthält das Logo bereits als base64)
-COPY marketingplan_template_makemypage.html .
+# Templates muessen mitkopiert werden, weil app.py sie beim Start einliest.
+COPY marketingplan_template_makemypage.html logo-abstimmung-template.html brand-manual-template.html ./
 COPY app.py .
 
 EXPOSE 8000
