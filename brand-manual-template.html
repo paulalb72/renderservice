@@ -238,22 +238,27 @@ pre{
 }
 pre code{ color:inherit; background:none; padding:0; }
 
-/* Logo-Vorschau (Wortmarke + Signet) */
+/* Logo-Vorschau */
 .logo-preview{
-  display:flex; align-items:center; gap:var(--space-md);
+  display:flex; align-items:center; justify-content:center;
   padding:var(--space-xl); border:1px dashed var(--color-line);
   border-radius:var(--radius-lg); margin:var(--space-md) 0; background:var(--color-bg-alt);
+  min-height:118px;
 }
-.logo-node{
-  width:40px; height:40px; border-radius:8px; flex:none;
-  background:linear-gradient(135deg, var(--color-primary), var(--color-accent));
+.logo-slot{
+  display:flex; align-items:center; justify-content:center; width:100%;
 }
-.logo-word{ font-family:var(--font-heading); font-weight:700; font-size:24px; color:var(--color-primary); }
-.logo-claim{ font-size:13px; color:var(--color-muted); }
-.logo-preview.dark{ background:var(--color-primary); border-color:transparent; }
-.logo-preview.dark .logo-word{ color:#fff; }
-.logo-preview.dark .logo-claim{ color:#c8d6ea; }
-
+.logo-slot img,
+.logo-slot svg{
+  display:block; width:auto; height:auto; max-width:360px; max-height:86px;
+}
+.logo-table-logo{
+  display:flex; align-items:center; min-height:54px; padding:6px 0;
+}
+.logo-table-logo img,
+.logo-table-logo svg{
+  display:block; width:auto; height:auto; max-width:220px; max-height:52px;
+}
 /* Bild-Platzhalter */
 .img-ph{
   display:flex; align-items:center; justify-content:center;
@@ -520,24 +525,15 @@ pre code{ color:inherit; background:none; padding:0; }
     <h3>3.1 Logo-System</h3>
     <p>{{LOGO_INTRO}}</p>
 
-    <!-- Live-Vorschau: Signet aus den Master-Farben, Wortmarke + Claim -->
+    <!-- Live-Vorschau aus den bestehenden Logo-Feldern -->
     <div class="logo-preview">
-      <span class="logo-node"></span>
-      <span><span class="logo-word">{{COMPANY_NAME}}</span><br><span class="logo-claim">{{MAIN_CLAIM}}</span></span>
-    </div>
-    <div class="logo-preview dark">
-      <span class="logo-node"></span>
-      <span><span class="logo-word">{{COMPANY_NAME}}</span><br><span class="logo-claim">{{MAIN_CLAIM}}</span></span>
+      <div class="logo-slot">{{LOGO_MAIN|safe}}</div>
     </div>
 
     <table>
       <thead><tr><th style="width:30%">Logo-Element</th><th>Vorgabe</th></tr></thead>
       <tbody>
-        <tr><td>Hauptlogo</td><td>{{LOGO_MAIN}}</td></tr>
-        <tr><td>Alternatives Logo</td><td>{{LOGO_ALT}}</td></tr>
-        <tr><td>Dunkler Hintergrund</td><td>{{LOGO_ON_DARK}}</td></tr>
-        <tr><td>Heller Hintergrund</td><td>{{LOGO_ON_LIGHT}}</td></tr>
-        <tr><td>Icon / Signet</td><td>{{LOGO_ICON}}</td></tr>
+        <tr><td>Hauptlogo</td><td><div class="logo-table-logo">{{LOGO_MAIN|safe}}</div></td></tr>
         <tr><td>Mindestgröße</td><td>{{LOGO_MIN_SIZE}}</td></tr>
         <tr><td>Schutzraum</td><td>{{LOGO_CLEARSPACE}}</td></tr>
         <tr><td>Verboten</td><td>{{LOGO_FORBIDDEN}}</td></tr>
@@ -1126,8 +1122,8 @@ pre code{ color:inherit; background:none; padding:0; }
   {{HERO_HEADLINE}}  {{HERO_SUBHEADLINE}}  {{HERO_PROOF_LINE}}  {{HERO_PRIMARY_CTA}}  {{HERO_SECONDARY_CTA}}
 
   >> TEIL 3 · VISUELL <<
-  {{PART3_SUBTITLE}}  {{LOGO_INTRO}}  {{LOGO_MAIN}}  {{LOGO_ALT}}  {{LOGO_ON_DARK}}  {{LOGO_ON_LIGHT}}
-  {{LOGO_ICON}}  {{LOGO_MIN_SIZE}}  {{LOGO_CLEARSPACE}}  {{LOGO_FORBIDDEN}}
+  {{PART3_SUBTITLE}}  {{LOGO_INTRO}}  {{LOGO_MAIN}}
+  {{LOGO_MIN_SIZE}}  {{LOGO_CLEARSPACE}}  {{LOGO_FORBIDDEN}}
   {{COLOR_INTRO}}  {{COLOR_RULE}}  {{TYPO_INTRO}}  {{TYPO_RULES}}
 
   >> TEIL 5 · UI <<
