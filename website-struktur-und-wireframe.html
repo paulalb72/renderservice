@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>{{COVER_COMPANY}} – {{COVER_TITLE}}</title>
+<!--
+  ============================================================================
+  LEER-TEMPLATE (Platzhalter) · WEBSITE-KONZEPT & CONVERSION-WIREFRAME
+  ============================================================================
+  Struktur, Reihenfolge und Layout sind FIX und entsprechen 1:1 dem
+  Quelldokument (12 Teile + Deckblatt, Inhaltsverzeichnis, Anhang).
+  Pro Kunde werden ausschliesslich Inhalte sowie die zwei Master-Farben
+  ausgetauscht.
+
+  >>> NUR DIESE BEIDEN WERTE STEUERN DAS GESAMTE FARBSYSTEM <<<
+        --brand-primary : Primaerfarbe (Deep Navy etc.)  – z. B. #0B1F3A
+        --brand-accent  : Akzentfarbe (kuehles Blau/Brass) – z. B. #2E6F8E
+  Alle weiteren Farben (Flaechen, Linien, Tints, Hover, dunkle Panels)
+  werden per color-mix() aus diesen beiden Werten abgeleitet.
+
+  ZIEL: PDF-Artefakt. Jeder Teil beginnt auf einer neuen Seite; einzelne
+  Bausteine (Cards, Callouts, Tabellenzeilen) werden nicht ueber den
+  Seitenrand zerschnitten. Export: Chromium-basiert (Chrome „Als PDF
+  speichern" oder headless Chromium / Puppeteer / Playwright), da color-mix()
+  einen modernen Renderer voraussetzt.
+  ============================================================================
+-->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<style>
+/* ===========================================================================
+   1. DESIGN TOKENS  – zentrale Steuerung
+   =========================================================================== */
+:root{
+
+  /* ----- MASTER-FARBEN (vom Kunden 1:1 eintragen) ----------------------- */
+  --brand-primary: {{BRAND_PRIMARY}};   /* Primaerfarbe – Deckblatt, Panels, Headings */
+  --brand-accent:  {{BRAND_ACCENT}};   /* Akzentfarbe  – Kicker, Marker, CTA, Linien */
+
+  /* ----- ABGELEITETE FLAECHEN & NEUTRALEN (aus den 2 Mastern) ----------- */
+  --ink:        color-mix(in oklab, var(--brand-primary) 78%, #05080d);     /* Fliesstext */
+  --ink-soft:   color-mix(in oklab, var(--brand-primary) 55%, #4a5663);     /* Sekundaertext */
+  --muted:      color-mix(in oklab, var(--brand-primary) 38%, #8893a0);     /* Labels, Captions */
+  --bg:         #FBFAF7;                                                    /* Off-White Seite */
+  --bg-alt:     color-mix(in srgb, var(--brand-primary) 4%, #FBFAF7);       /* ruhiger Tint */
+  --surface:    #FFFFFF;                                                    /* Cards */
+  --line:       color-mix(in srgb, var(--brand-primary) 14%, transparent);  /* Hairlines */
+  --line-soft:  color-mix(in srgb, var(--brand-primary) 8%, transparent);
+  --primary-08: color-mix(in srgb, var(--brand-primary) 8%, #fff);
+  --primary-14: color-mix(in srgb, var(--brand-primary) 14%, #fff);
+  --accent-10:  color-mix(in srgb, var(--brand-accent) 10%, #fff);
+  --accent-16:  color-mix(in srgb, var(--brand-accent) 16%, #fff);
+  --accent-ink: color-mix(in oklab, var(--brand-accent) 70%, #06121a);      /* Akzenttext lesbar */
+  --panel:      var(--brand-primary);                                       /* dunkle Panels */
+  --panel-2:    color-mix(in oklab, var(--brand-primary) 86%, #000);        /* tiefere Panels */
+  --on-dark:    color-mix(in srgb, #fff 92%, var(--brand-accent));          /* Text auf dunkel */
+  --on-dark-mut:color-mix(in srgb, #fff 62%, var(--brand-primary));
+
+  /* ----- TYPOGRAFIE ----------------------------------------------------- */
+  --font-display: "IBM Plex Serif", Georgia, serif;     /* editoriale Momente */
+  --font-sans:    "IBM Plex Sans", system-ui, sans-serif;/* UI / Fliesstext   */
+  --font-mono:    "IBM Plex Mono", ui-monospace, monospace; /* Labels / Daten */
+
+  /* ----- LAYOUT --------------------------------------------------------- */
+  --maxw: 1140px;
+  --pad:  clamp(20px, 5vw, 72px);
+  --radius: 4px;
+}
+
+/* ===========================================================================
+   2. RESET & GRUNDLAGEN
+   =========================================================================== */
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:var(--font-sans);
+  color:var(--ink);
+  background:var(--bg);
+  font-size:16px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+h1,h2,h3,h4{margin:0;font-weight:600;line-height:1.16;color:var(--brand-primary);}
+p{margin:0 0 1em;}
+a{color:var(--accent-ink);text-decoration:none;}
+strong{font-weight:600;color:var(--ink);}
+::selection{background:var(--accent-16);}
+
+/* ===========================================================================
+   3. SEITEN-/TEIL-LAYOUT
+   =========================================================================== */
+.page{
+  max-width:var(--maxw);
+  margin:0 auto;
+  padding:clamp(48px,8vw,104px) var(--pad);
+}
+.part{border-top:1px solid var(--line);}
+.part:first-of-type{border-top:none;}
+
+/* Eyebrow / Teil-Index (mono) */
+.eyebrow{
+  font-family:var(--font-mono);font-size:12px;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink);
+  display:flex;align-items:center;gap:12px;margin-bottom:18px;
+}
+.eyebrow::before{
+  content:"";width:26px;height:1px;background:var(--brand-accent);flex:none;
+}
+.part-no{font-family:var(--font-mono);color:var(--brand-accent);}
+
+.part-title{
+  font-family:var(--font-display);font-weight:500;
+  font-size:clamp(28px,4.4vw,46px);letter-spacing:-.015em;
+  max-width:20ch;margin-bottom:.5em;
+}
+.lead{
+  font-size:clamp(17px,1.6vw,19px);color:var(--ink-soft);
+  max-width:62ch;margin-bottom:2.4em;line-height:1.6;
+}
+.sub-h{
+  font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);
+  margin:2.6em 0 1.1em;padding-bottom:.7em;border-bottom:1px solid var(--line);
+}
+.sub-h .n{color:var(--brand-accent);margin-right:.6em;}
+
+/* ===========================================================================
+   5. TABELLEN (Daten-/Befundtabellen)
+   =========================================================================== */
+.tbl{width:100%;border-collapse:collapse;margin:0 0 1.6em;font-size:14.5px;}
+.tbl th{
+  text-align:left;font-family:var(--font-mono);font-weight:500;
+  font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);padding:0 18px 11px;border-bottom:1px solid var(--brand-primary);
+  vertical-align:bottom;
+}
+.tbl td{
+  padding:15px 18px;border-bottom:1px solid var(--line-soft);
+  vertical-align:top;color:var(--ink-soft);line-height:1.5;
+}
+.tbl td:first-child,.tbl th:first-child{padding-left:0;}
+.tbl td:last-child,.tbl th:last-child{padding-right:0;}
+.tbl td strong{color:var(--brand-primary);font-weight:600;}
+.tbl .lead-col{color:var(--brand-primary);font-weight:600;width:24%;}
+
+/* ===========================================================================
+   6. CALLOUT / THESE-PANEL (dunkel)
+   =========================================================================== */
+.callout{
+  background:var(--panel);color:var(--on-dark);
+  border-radius:var(--radius);padding:clamp(28px,4vw,44px);
+  margin:2.4em 0;position:relative;overflow:hidden;
+}
+.callout::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--brand-accent);
+}
+.callout .k{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--brand-accent);
+  margin-bottom:14px;display:block;
+}
+.callout p{color:var(--on-dark);font-size:clamp(18px,2vw,22px);
+  line-height:1.5;margin:0;font-family:var(--font-display);}
+.callout.soft{background:var(--bg-alt);color:var(--ink);}
+.callout.soft::before{background:var(--brand-accent);}
+.callout.soft .k{color:var(--accent-ink);}
+.callout.soft p{color:var(--brand-primary);}
+
+/* ===========================================================================
+   7. CARD-GRIDS
+   =========================================================================== */
+.grid{display:grid;gap:18px;margin:1.2em 0 2em;}
+.g2{grid-template-columns:repeat(2,1fr);}
+.g3{grid-template-columns:repeat(3,1fr);}
+.card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:24px 22px;
+}
+.card.accent{border-left:3px solid var(--brand-accent);}
+.card h4{font-size:16px;margin-bottom:.5em;letter-spacing:-.01em;}
+.card .ico{
+  font-family:var(--font-mono);font-size:12px;color:var(--brand-accent);
+  letter-spacing:.1em;display:block;margin-bottom:14px;
+}
+.card p{font-size:14.5px;color:var(--ink-soft);margin:0;line-height:1.55;}
+
+/* ===========================================================================
+   8. PILLS / TRUST-BAR
+   =========================================================================== */
+.pills{display:flex;flex-wrap:wrap;gap:9px;margin:1em 0 2em;}
+.pill{
+  font-family:var(--font-mono);font-size:12px;letter-spacing:.04em;
+  padding:7px 15px;border-radius:999px;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);
+}
+.pill.on{background:var(--accent-10);border-color:transparent;color:var(--accent-ink);}
+
+/* ===========================================================================
+   9. CHECKLIST / BULLETS
+   =========================================================================== */
+.checks{list-style:none;padding:0;margin:1em 0 2em;display:grid;gap:11px;}
+.g2.checks{grid-template-columns:repeat(2,1fr);}
+.checks li{
+  position:relative;padding-left:28px;color:var(--ink-soft);
+  font-size:15px;line-height:1.5;
+}
+.checks li::before{
+  content:"";position:absolute;left:0;top:8px;width:11px;height:11px;
+  border:1.5px solid var(--brand-accent);border-radius:2px;
+}
+.dash{list-style:none;padding:0;margin:1em 0 2em;display:grid;gap:9px;}
+.dash li{position:relative;padding-left:22px;color:var(--ink-soft);font-size:15px;}
+.dash li::before{content:"—";position:absolute;left:0;color:var(--brand-accent);}
+
+/* ===========================================================================
+   10. PROCESS TIMELINE  (echte Sequenz – Nummerierung gerechtfertigt)
+   =========================================================================== */
+.timeline{display:flex;flex-wrap:wrap;gap:0;margin:1.4em 0 2em;
+  border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+.timeline .step{
+  flex:1 1 0;min-width:140px;padding:20px 18px;border-right:1px solid var(--line);
+  background:var(--surface);
+}
+.timeline .step:last-child{border-right:none;}
+.timeline .step .n{
+  font-family:var(--font-mono);font-size:12px;color:var(--brand-accent);
+  letter-spacing:.1em;display:block;margin-bottom:8px;
+}
+.timeline .step .t{font-weight:600;color:var(--brand-primary);font-size:14.5px;}
+
+/* ===========================================================================
+   11. WIREFRAME-BLOCK (Teil 9)
+   =========================================================================== */
+.wf{
+  border:1px solid var(--line);border-radius:var(--radius);
+  margin:1.6em 0;overflow:hidden;background:var(--surface);
+}
+.wf-head{
+  background:var(--bg-alt);padding:22px 26px;border-bottom:1px solid var(--line);
+}
+.wf-head .wf-id{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--brand-accent);margin-bottom:7px;display:block;
+}
+.wf-head h3{font-family:var(--font-display);font-weight:500;font-size:23px;}
+.wf-meta{display:flex;flex-wrap:wrap;gap:22px;margin-top:14px;}
+.wf-meta div{font-size:13px;color:var(--ink-soft);}
+.wf-meta span{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);display:block;margin-bottom:2px;
+}
+.wf-body{padding:6px 26px 22px;}
+.wf-body .tbl{margin-top:14px;}
+.wf-body .tbl td{padding:12px 16px;font-size:13.5px;}
+
+/* ===========================================================================
+   12. DECKBLATT
+   =========================================================================== */
+.cover{
+  background:var(--panel);color:var(--on-dark);
+  min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(40px,8vw,96px) var(--pad);position:relative;overflow:hidden;
+}
+.cover::after{ /* dezente Datenraster-Atmosphaere */
+  content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;
+  background-image:
+    linear-gradient(color-mix(in srgb,var(--brand-accent) 18%,transparent) 1px,transparent 1px),
+    linear-gradient(90deg,color-mix(in srgb,var(--brand-accent) 18%,transparent) 1px,transparent 1px);
+  background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(120% 80% at 80% 20%,#000,transparent 70%);
+          mask-image:radial-gradient(120% 80% at 80% 20%,#000,transparent 70%);
+}
+.cover-inner{max-width:var(--maxw);margin:0 auto;width:100%;position:relative;z-index:1;}
+.cover .wordmark{
+  font-family:var(--font-mono);font-size:13px;letter-spacing:.34em;
+  text-transform:uppercase;color:var(--brand-accent);margin-bottom:42px;
+}
+.cover h1{
+  font-family:var(--font-display);font-weight:400;color:var(--on-dark);
+  font-size:clamp(36px,6.4vw,76px);line-height:1.04;letter-spacing:-.02em;
+  max-width:16ch;margin-bottom:.4em;
+}
+.cover .sub{
+  font-size:clamp(16px,1.8vw,20px);color:var(--on-dark-mut);max-width:54ch;
+  line-height:1.55;margin-bottom:3em;
+}
+.cover .strategic{
+  border-left:2px solid var(--brand-accent);padding-left:22px;
+  max-width:58ch;color:var(--on-dark);font-size:15.5px;line-height:1.6;
+  margin-bottom:3.4em;
+}
+.cover .strategic .k{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--brand-accent);display:block;margin-bottom:10px;
+}
+.cover .meta{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1px;background:color-mix(in srgb,var(--brand-accent) 22%,transparent);
+  border:1px solid color-mix(in srgb,var(--brand-accent) 22%,transparent);
+  border-radius:var(--radius);overflow:hidden;
+}
+.cover .meta div{background:var(--panel-2);padding:18px 20px;}
+.cover .meta .lbl{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--brand-accent);margin-bottom:6px;display:block;
+}
+.cover .meta .val{color:var(--on-dark);font-size:14px;line-height:1.45;}
+
+/* ===========================================================================
+   13. INHALTSVERZEICHNIS
+   =========================================================================== */
+.toc{counter-reset:toc;}
+.toc a{
+  display:flex;align-items:baseline;gap:18px;padding:18px 4px;
+  border-bottom:1px solid var(--line);color:var(--brand-primary);
+}
+.toc a .num{
+  font-family:var(--font-mono);font-size:13px;color:var(--brand-accent);
+  letter-spacing:.06em;flex:none;width:34px;
+}
+.toc a .ttl{font-family:var(--font-display);font-size:clamp(18px,2.2vw,24px);
+  font-weight:500;flex:1;}
+.toc a .dots{flex:1;border-bottom:1px dotted var(--line);transform:translateY(-4px);}
+
+/* ===========================================================================
+   14. FOOTER / SEITENMARKE
+   =========================================================================== */
+.pagemark{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:28px;margin-top:48px;border-top:1px solid var(--line);
+}
+.doc-foot{
+  background:var(--panel);color:var(--on-dark-mut);text-align:center;
+  padding:56px var(--pad);font-family:var(--font-mono);font-size:12px;
+  letter-spacing:.08em;
+}
+.doc-foot strong{color:var(--brand-accent);font-weight:500;}
+
+/* ===========================================================================
+   15. RESPONSIVE
+   =========================================================================== */
+@media screen and (max-width:760px){
+  .g2,.g3,.g2.checks{grid-template-columns:1fr;}
+  .tbl,.tbl thead,.tbl tbody,.tbl tr,.tbl th,.tbl td{display:block;}
+  .tbl thead{display:none;}
+  .tbl tr{border-bottom:1px solid var(--line);padding:10px 0;}
+  .tbl td{border:none;padding:4px 0;}
+  .tbl td:first-child{font-weight:600;color:var(--brand-primary);padding-top:8px;}
+  .timeline .step{flex:1 1 100%;border-right:none;border-bottom:1px solid var(--line);}
+  .wf-meta{gap:14px;}
+}
+
+/* ===========================================================================
+   16. DRUCK / PDF  – jeder Teil eine neue Seite, keine zerschnittenen Bloecke
+   =========================================================================== */
+@page{ margin:16mm 14mm; }
+@media print{
+  *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{background:#fff;font-size:10.5pt;line-height:1.5;}
+
+  /* --- Jedes Kapitel beginnt auf einer neuen Seite --- */
+  .cover{min-height:auto;page-break-after:always;break-after:page;}
+  .part{page-break-before:always;break-before:page;border-top:none;}
+  .page{padding:0;max-width:100%;}
+
+  /* --- Einzelne Bausteine NICHT ueber den Seitenrand brechen --- */
+  .card,.callout,.timeline,.wf-head,.toc a,.cover .meta{
+    break-inside:avoid;page-break-inside:avoid;
+  }
+  .tbl tr{break-inside:avoid;page-break-inside:avoid;}
+  .tbl thead{display:table-header-group;}   /* Kopfzeile auf Folgeseiten wiederholen */
+  .checks li,.dash li{break-inside:avoid;page-break-inside:avoid;}
+
+  /* --- Ueberschriften nie allein am Seitenende stehen lassen --- */
+  .eyebrow,.part-title,.sub-h,.wf-head{break-after:avoid;page-break-after:avoid;}
+
+  /* In-Flow-Kapitelzeile im Druck ausblenden – die laufende Fuszeile
+     (vom Renderer auf jede Seite gestempelt) uebernimmt diese Rolle. */
+  .pagemark{display:none;}
+
+  /* --- Wireframe-Block: Kopf bleibt bei den ersten Zeilen --- */
+  .wf{break-inside:auto;}
+
+  a{color:var(--brand-primary);text-decoration:none;}
+}
+</style>
+</head>
+<body>
+<!-- ========================================================================
+     DECKBLATT
+     ===================================================================== -->
+<header class="cover">
+<div class="cover-inner">
+
+<div class="wordmark">{{COVER_COMPANY}}</div>
+<!-- {{DOC_TITLE}} -->
+<h1>{{COVER_TITLE}}</h1>
+<!-- {{DOC_SUBTITLE}} -->
+<p class="sub">{{COVER_SUBTITLE}}</p>
+<!-- {{STRATEGIC_CORE}} -->
+<div class="strategic">
+<span class="k">Strategischer Kern</span>{{COVER_STRATEGIC}}</div>
+<div class="meta">
+<div><span class="lbl">Website</span><span class="val">{{COVER_META_WEBSITE}}</span></div>
+<div><span class="lbl">Input-Basis</span><span class="val">{{COVER_META_INPUT_BASIS}}</span></div>
+<div><span class="lbl">Methodik</span><span class="val">{{COVER_META_METHODIK}}</span></div>
+<div><span class="lbl">Ausgabezweck</span><span class="val">{{COVER_META_AUSGABEZWECK}}</span></div>
+</div>
+</div>
+</header>
+<!-- ========================================================================
+     INHALTSVERZEICHNIS
+     ===================================================================== -->
+<section class="page">
+<div class="eyebrow">Inhalt</div>
+<h2 class="part-title">Inhaltsverzeichnis</h2>
+<nav class="toc">
+<a href="#t1"><span class="num">01</span><span class="ttl">Executive Summary</span><span class="dots"></span></a>
+<a href="#t2"><span class="num">02</span><span class="ttl">Strategische Analyse</span><span class="dots"></span></a>
+<a href="#t3"><span class="num">03</span><span class="ttl">Zielgruppen, Kaufmotive &amp; Conversion-Hebel</span><span class="dots"></span></a>
+<a href="#t4"><span class="num">04</span><span class="ttl">Positionierung &amp; Messaging</span><span class="dots"></span></a>
+<a href="#t5"><span class="num">05</span><span class="ttl">Sitemap &amp; Navigation</span><span class="dots"></span></a>
+<a href="#t6"><span class="num">06</span><span class="ttl">User Journey &amp; CTA-Logik</span><span class="dots"></span></a>
+<a href="#t7"><span class="num">07</span><span class="ttl">Design-Richtung 2026</span><span class="dots"></span></a>
+<a href="#t8"><span class="num">08</span><span class="ttl">Copywriting-System</span><span class="dots"></span></a>
+<a href="#t9"><span class="num">09</span><span class="ttl">Textueller Wireframe je Seite</span><span class="dots"></span></a>
+<a href="#t10"><span class="num">10</span><span class="ttl">SEO-Struktur</span><span class="dots"></span></a>
+<a href="#t11"><span class="num">11</span><span class="ttl">Technische Empfehlungen</span><span class="dots"></span></a>
+<a href="#t12"><span class="num">12</span><span class="ttl">Umsetzungspaket für Figma &amp; Live-Webseite</span><span class="dots"></span></a>
+</nav>
+<div class="callout soft">
+<span class="k">Leselogik für die Umsetzung</span>
+<p>Die Teile 5 bis 12 sind direkte Umsetzungsgrundlage. Design startet mit Sitemap,
+    Design-Richtung und Wireframes; Entwicklung prüft CMS-Struktur, Tracking und technische
+    Empfehlungen parallel.</p>
+</div>
+</section>
+<!-- ========================================================================
+     TEIL 1 · EXECUTIVE SUMMARY
+     ===================================================================== -->
+<section class="part page" id="t1">
+<div class="eyebrow"><span class="part-no">01</span> Executive Summary</div>
+<h2 class="part-title">{{EXEC_TITLE}}</h2>
+<p class="lead">{{EXEC_LEAD}}</p>
+<table class="tbl">
+<thead><tr><th>Bereich</th><th>Befund</th><th>Empfehlung</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{EXEC_R1_BEREICH}}</td><td>{{EXEC_R1_BEFUND}}</td><td>{{EXEC_R1_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{EXEC_R2_BEREICH}}</td><td>{{EXEC_R2_BEFUND}}</td><td>{{EXEC_R2_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{EXEC_R3_BEREICH}}</td><td>{{EXEC_R3_BEFUND}}</td><td>{{EXEC_R3_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{EXEC_R4_BEREICH}}</td><td>{{EXEC_R4_BEFUND}}</td><td>{{EXEC_R4_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{EXEC_R5_BEREICH}}</td><td>{{EXEC_R5_BEFUND}}</td><td>{{EXEC_R5_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{EXEC_R6_BEREICH}}</td><td>{{EXEC_R6_BEFUND}}</td><td>{{EXEC_R6_EMPFEHLUNG}}</td></tr>
+</tbody>
+</table>
+<div class="callout">
+<span class="k">Zentrale Conversion-These</span>
+<p>{{EXEC_CALLOUT_1}}</p>
+</div>
+<div class="pagemark"><span>{{COVER_COMPANY}}</span><span>01 — Executive Summary</span></div>
+</section>
+<!-- ========================================================================
+     TEIL 2 · STRATEGISCHE ANALYSE
+     ===================================================================== -->
+<section class="part page" id="t2">
+<div class="eyebrow"><span class="part-no">02</span> Strategische Analyse</div>
+<h2 class="part-title">{{ANALYSE_TITLE}}</h2>
+<div class="sub-h"><span class="n">2.1</span> Aktuelle Positionierung</div>
+<p>{{ANALYSE_PARA_1}}</p>
+<div class="sub-h"><span class="n">2.2</span> Conversion-Diagnose der aktuellen Website</div>
+<table class="tbl">
+<thead><tr><th>Element</th><th>Befund</th><th>Risiko</th><th>Empfehlung</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{ANALYSE_R1_ELEMENT}}</td><td>{{ANALYSE_R1_BEFUND}}</td><td>{{ANALYSE_R1_RISIKO}}</td><td>{{ANALYSE_R1_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{ANALYSE_R2_ELEMENT}}</td><td>{{ANALYSE_R2_BEFUND}}</td><td>{{ANALYSE_R2_RISIKO}}</td><td>{{ANALYSE_R2_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{ANALYSE_R3_ELEMENT}}</td><td>{{ANALYSE_R3_BEFUND}}</td><td>{{ANALYSE_R3_RISIKO}}</td><td>{{ANALYSE_R3_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{ANALYSE_R4_ELEMENT}}</td><td>{{ANALYSE_R4_BEFUND}}</td><td>{{ANALYSE_R4_RISIKO}}</td><td>{{ANALYSE_R4_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{ANALYSE_R5_ELEMENT}}</td><td>{{ANALYSE_R5_BEFUND}}</td><td>{{ANALYSE_R5_RISIKO}}</td><td>{{ANALYSE_R5_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{ANALYSE_R6_ELEMENT}}</td><td>{{ANALYSE_R6_BEFUND}}</td><td>{{ANALYSE_R6_RISIKO}}</td><td>{{ANALYSE_R6_EMPFEHLUNG}}</td></tr>
+</tbody>
+</table>
+<div class="sub-h"><span class="n">2.3</span> Nicht belegbare Informationen</div>
+<ul class="dash">
+<li>{{ANALYSE_ITEM_1}}</li>
+<li>{{ANALYSE_ITEM_2}}</li>
+<li>{{ANALYSE_ITEM_3}}</li>
+<li>{{ANALYSE_ITEM_4}}</li>
+<li>{{ANALYSE_ITEM_5}}</li>
+</ul>
+<div class="pagemark"><span>{{COVER_COMPANY}}</span><span>02 — Strategische Analyse</span></div>
+</section>
+<!-- ========================================================================
+     TEIL 3 · ZIELGRUPPEN, KAUFMOTIVE, CONVERSION-HEBEL
+     ===================================================================== -->
+<section class="part page" id="t3">
+<div class="eyebrow"><span class="part-no">03</span> Zielgruppen &amp; Psychologie</div>
+<h2 class="part-title">{{ZIELGRUPPEN_TITLE}}</h2>
+<div class="sub-h"><span class="n">3.1</span> Zielgruppen</div>
+<table class="tbl">
+<thead><tr><th>Zielgruppe</th><th>Typische Aufgabe</th><th>Conversion-Relevanz</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{ZIELGRUPPEN_T1_R1_ZIELGRUPPE}}</td><td>{{ZIELGRUPPEN_T1_R1_TYPISCHE_AUFGABE}}</td><td>{{ZIELGRUPPEN_T1_R1_CONVERSION_RELEVANZ}}</td></tr>
+<tr><td class="lead-col">{{ZIELGRUPPEN_T1_R2_ZIELGRUPPE}}</td><td>{{ZIELGRUPPEN_T1_R2_TYPISCHE_AUFGABE}}</td><td>{{ZIELGRUPPEN_T1_R2_CONVERSION_RELEVANZ}}</td></tr>
+<tr><td class="lead-col">{{ZIELGRUPPEN_T1_R3_ZIELGRUPPE}}</td><td>{{ZIELGRUPPEN_T1_R3_TYPISCHE_AUFGABE}}</td><td>{{ZIELGRUPPEN_T1_R3_CONVERSION_RELEVANZ}}</td></tr>
+<tr><td class="lead-col">{{ZIELGRUPPEN_T1_R4_ZIELGRUPPE}}</td><td>{{ZIELGRUPPEN_T1_R4_TYPISCHE_AUFGABE}}</td><td>{{ZIELGRUPPEN_T1_R4_CONVERSION_RELEVANZ}}</td></tr>
+<tr><td class="lead-col">{{ZIELGRUPPEN_T1_R5_ZIELGRUPPE}}</td><td>{{ZIELGRUPPEN_T1_R5_TYPISCHE_AUFGABE}}</td><td>{{ZIELGRUPPEN_T1_R5_CONVERSION_RELEVANZ}}</td></tr>
+<tr><td class="lead-col">{{ZIELGRUPPEN_T1_R6_ZIELGRUPPE}}</td><td>{{ZIELGRUPPEN_T1_R6_TYPISCHE_AUFGABE}}</td><td>{{ZIELGRUPPEN_T1_R6_CONVERSION_RELEVANZ}}</td></tr>
+</tbody>
+</table>
+<div class="sub-h"><span class="n">3.2</span> Kaufmotive &amp; psychologische Hebel</div>
+<div class="grid g3">
+<div class="card accent"><span class="ico">{{ZIELGRUPPEN_CARD1_LABEL}}</span><h4>{{ZIELGRUPPEN_CARD1_TITLE}}</h4><p>{{ZIELGRUPPEN_CARD1_TEXT1}}</p></div>
+<div class="card accent"><span class="ico">{{ZIELGRUPPEN_CARD2_LABEL}}</span><h4>{{ZIELGRUPPEN_CARD2_TITLE}}</h4><p>{{ZIELGRUPPEN_CARD2_TEXT1}}</p></div>
+<div class="card accent"><span class="ico">{{ZIELGRUPPEN_CARD3_LABEL}}</span><h4>{{ZIELGRUPPEN_CARD3_TITLE}}</h4><p>{{ZIELGRUPPEN_CARD3_TEXT1}}</p></div>
+<div class="card accent"><span class="ico">{{ZIELGRUPPEN_CARD4_LABEL}}</span><h4>{{ZIELGRUPPEN_CARD4_TITLE}}</h4><p>{{ZIELGRUPPEN_CARD4_TEXT1}}</p></div>
+<div class="card accent"><span class="ico">{{ZIELGRUPPEN_CARD5_LABEL}}</span><h4>{{ZIELGRUPPEN_CARD5_TITLE}}</h4><p>{{ZIELGRUPPEN_CARD5_TEXT1}}</p></div>
+<div class="card accent"><span class="ico">{{ZIELGRUPPEN_CARD6_LABEL}}</span><h4>{{ZIELGRUPPEN_CARD6_TITLE}}</h4><p>{{ZIELGRUPPEN_CARD6_TEXT1}}</p></div>
+</div>
+<div class="sub-h"><span class="n">3.3</span> Ängste, Einwände &amp; Behandlungslogik</div>
+<table class="tbl">
+<thead><tr><th>Einwand</th><th>Website-Antwort</th><th>Conversion-Element</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{ZIELGRUPPEN_T2_R1_EINWAND}}</td><td>{{ZIELGRUPPEN_T2_R1_WEBSITE_ANTWORT}}</td><td>{{ZIELGRUPPEN_T2_R1_CONVERSION_ELEMENT}}</td></tr>
+<tr><td class="lead-col">{{ZIELGRUPPEN_T2_R2_EINWAND}}</td><td>{{ZIELGRUPPEN_T2_R2_WEBSITE_ANTWORT}}</td><td>{{ZIELGRUPPEN_T2_R2_CONVERSION_ELEMENT}}</td></tr>
+<tr><td class="lead-col">{{ZIELGRUPPEN_T2_R3_EINWAND}}</td><td>{{ZIELGRUPPEN_T2_R3_WEBSITE_ANTWORT}}</td><td>{{ZIELGRUPPEN_T2_R3_CONVERSION_ELEMENT}}</td></tr>
+<tr><td class="lead-col">{{ZIELGRUPPEN_T2_R4_EINWAND}}</td><td>{{ZIELGRUPPEN_T2_R4_WEBSITE_ANTWORT}}</td><td>{{ZIELGRUPPEN_T2_R4_CONVERSION_ELEMENT}}</td></tr>
+<tr><td class="lead-col">{{ZIELGRUPPEN_T2_R5_EINWAND}}</td><td>{{ZIELGRUPPEN_T2_R5_WEBSITE_ANTWORT}}</td><td>{{ZIELGRUPPEN_T2_R5_CONVERSION_ELEMENT}}</td></tr>
+<tr><td class="lead-col">{{ZIELGRUPPEN_T2_R6_EINWAND}}</td><td>{{ZIELGRUPPEN_T2_R6_WEBSITE_ANTWORT}}</td><td>{{ZIELGRUPPEN_T2_R6_CONVERSION_ELEMENT}}</td></tr>
+</tbody>
+</table>
+<div class="sub-h"><span class="n">3.4</span> Psychologische Conversion-Hebel</div>
+<ul class="checks g2">
+<li>{{ZIELGRUPPEN_BENEFIT_1}}</li>
+<li>{{ZIELGRUPPEN_BENEFIT_2}}</li>
+<li>{{ZIELGRUPPEN_BENEFIT_3}}</li>
+<li>{{ZIELGRUPPEN_BENEFIT_4}}</li>
+<li>{{ZIELGRUPPEN_BENEFIT_5}}</li>
+<li>{{ZIELGRUPPEN_BENEFIT_6}}</li>
+</ul>
+<div class="pagemark"><span>{{COVER_COMPANY}}</span><span>03 — Zielgruppen</span></div>
+</section>
+<!-- ========================================================================
+     TEIL 4 · POSITIONIERUNG & MESSAGING
+     ===================================================================== -->
+<section class="part page" id="t4">
+<div class="eyebrow"><span class="part-no">04</span> Positionierung &amp; Messaging</div>
+<h2 class="part-title">{{POSITION_TITLE}}</h2>
+<div class="callout">
+<span class="k">4.1 · Positionierungsstatement</span>
+<p>{{POSITION_CALLOUT_1}}</p>
+</div>
+<div class="sub-h"><span class="n">4.2</span> Kommunikationskern</div>
+<p>{{POSITION_PARA_1}}</p>
+<div class="sub-h"><span class="n">4.3</span> USPs</div>
+<table class="tbl">
+<thead><tr><th>USP</th><th>Belegbarkeit</th><th>Website-Kommunikation</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{POSITION_R1_USP}}</td><td>{{POSITION_R1_BELEGBARKEIT}}</td><td>{{POSITION_R1_WEBSITE_KOMMUNIKATION}}</td></tr>
+<tr><td class="lead-col">{{POSITION_R2_USP}}</td><td>{{POSITION_R2_BELEGBARKEIT}}</td><td>{{POSITION_R2_WEBSITE_KOMMUNIKATION}}</td></tr>
+<tr><td class="lead-col">{{POSITION_R3_USP}}</td><td>{{POSITION_R3_BELEGBARKEIT}}</td><td>{{POSITION_R3_WEBSITE_KOMMUNIKATION}}</td></tr>
+<tr><td class="lead-col">{{POSITION_R4_USP}}</td><td>{{POSITION_R4_BELEGBARKEIT}}</td><td>{{POSITION_R4_WEBSITE_KOMMUNIKATION}}</td></tr>
+<tr><td class="lead-col">{{POSITION_R5_USP}}</td><td>{{POSITION_R5_BELEGBARKEIT}}</td><td>{{POSITION_R5_WEBSITE_KOMMUNIKATION}}</td></tr>
+</tbody>
+</table>
+<div class="pagemark"><span>{{COVER_COMPANY}}</span><span>04 — Positionierung</span></div>
+</section>
+<!-- ========================================================================
+     TEIL 5 · SITEMAP & NAVIGATION
+     ===================================================================== -->
+<section class="part page" id="t5">
+<div class="eyebrow"><span class="part-no">05</span> Sitemap &amp; Navigation</div>
+<h2 class="part-title">{{SITEMAP_TITLE}}</h2>
+<div class="sub-h"><span class="n">5.1</span> Hauptnavigation</div>
+<table class="tbl">
+<thead><tr><th>Ebene 1</th><th>Ebene 2</th><th>Zweck</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{SITEMAP_T1_R1_EBENE_1}}</td><td>{{SITEMAP_T1_R1_EBENE_2}}</td><td>{{SITEMAP_T1_R1_ZWECK}}</td></tr>
+<tr><td class="lead-col">{{SITEMAP_T1_R2_EBENE_1}}</td><td>{{SITEMAP_T1_R2_EBENE_2}}</td><td>{{SITEMAP_T1_R2_ZWECK}}</td></tr>
+<tr><td class="lead-col">{{SITEMAP_T1_R3_EBENE_1}}</td><td>{{SITEMAP_T1_R3_EBENE_2}}</td><td>{{SITEMAP_T1_R3_ZWECK}}</td></tr>
+<tr><td class="lead-col">{{SITEMAP_T1_R4_EBENE_1}}</td><td>{{SITEMAP_T1_R4_EBENE_2}}</td><td>{{SITEMAP_T1_R4_ZWECK}}</td></tr>
+<tr><td class="lead-col">{{SITEMAP_T1_R5_EBENE_1}}</td><td>{{SITEMAP_T1_R5_EBENE_2}}</td><td>{{SITEMAP_T1_R5_ZWECK}}</td></tr>
+<tr><td class="lead-col">{{SITEMAP_T1_R6_EBENE_1}}</td><td>{{SITEMAP_T1_R6_EBENE_2}}</td><td>{{SITEMAP_T1_R6_ZWECK}}</td></tr>
+</tbody>
+</table>
+<div class="sub-h"><span class="n">5.2</span> URL-Struktur</div>
+<table class="tbl">
+<thead><tr><th>Seite</th><th>Empfohlene URL</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{SITEMAP_T2_R1_SEITE}}</td><td><code>{{SITEMAP_T2_R1_EMPFOHLENE_URL}}</code></td></tr>
+<tr><td class="lead-col">{{SITEMAP_T2_R2_SEITE}}</td><td><code>{{SITEMAP_T2_R2_EMPFOHLENE_URL}}</code></td></tr>
+<tr><td class="lead-col">{{SITEMAP_T2_R3_SEITE}}</td><td><code>{{SITEMAP_T2_R3_EMPFOHLENE_URL}}</code></td></tr>
+<tr><td class="lead-col">{{SITEMAP_T2_R4_SEITE}}</td><td><code>{{SITEMAP_T2_R4_EMPFOHLENE_URL}}</code></td></tr>
+<tr><td class="lead-col">{{SITEMAP_T2_R5_SEITE}}</td><td><code>{{SITEMAP_T2_R5_EMPFOHLENE_URL}}</code></td></tr>
+<tr><td class="lead-col">{{SITEMAP_T2_R6_SEITE}}</td><td><code>{{SITEMAP_T2_R6_EMPFOHLENE_URL}}</code></td></tr>
+<tr><td class="lead-col">{{SITEMAP_T2_R7_SEITE}}</td><td><code>{{SITEMAP_T2_R7_EMPFOHLENE_URL}}</code></td></tr>
+<tr><td class="lead-col">{{SITEMAP_T2_R8_SEITE}}</td><td><code>{{SITEMAP_T2_R8_EMPFOHLENE_URL}}</code></td></tr>
+<tr><td class="lead-col">{{SITEMAP_T2_R9_SEITE}}</td><td><code>{{SITEMAP_T2_R9_EMPFOHLENE_URL}}</code></td></tr>
+<tr><td class="lead-col">{{SITEMAP_T2_R10_SEITE}}</td><td><code>{{SITEMAP_T2_R10_EMPFOHLENE_URL}}</code></td></tr>
+<tr><td class="lead-col">{{SITEMAP_T2_R11_SEITE}}</td><td><code>{{SITEMAP_T2_R11_EMPFOHLENE_URL}}</code></td></tr>
+<tr><td class="lead-col">{{SITEMAP_T2_R12_SEITE}}</td><td><code>{{SITEMAP_T2_R12_EMPFOHLENE_URL}}</code></td></tr>
+<tr><td class="lead-col">{{SITEMAP_T2_R13_SEITE}}</td><td><code>{{SITEMAP_T2_R13_EMPFOHLENE_URL}}</code></td></tr>
+<tr><td class="lead-col">{{SITEMAP_T2_R14_SEITE}}</td><td><code>{{SITEMAP_T2_R14_EMPFOHLENE_URL}}</code></td></tr>
+</tbody>
+</table>
+<div class="pagemark"><span>{{COVER_COMPANY}}</span><span>05 — Sitemap</span></div>
+</section>
+<!-- ========================================================================
+     TEIL 6 · USER JOURNEY & CTA-LOGIK
+     ===================================================================== -->
+<section class="part page" id="t6">
+<div class="eyebrow"><span class="part-no">06</span> User Journey &amp; CTA-Logik</div>
+<h2 class="part-title">{{JOURNEY_TITLE}}</h2>
+<div class="sub-h"><span class="n">6.1</span> Primärer B2B-Projekt-Funnel</div>
+<div class="timeline">
+<div class="step"><span class="n">01</span><span class="t">{{JOURNEY_STEP_1}}</span></div>
+<div class="step"><span class="n">02</span><span class="t">{{JOURNEY_STEP_2}}</span></div>
+<div class="step"><span class="n">03</span><span class="t">{{JOURNEY_STEP_3}}</span></div>
+<div class="step"><span class="n">04</span><span class="t">{{JOURNEY_STEP_4}}</span></div>
+<div class="step"><span class="n">05</span><span class="t">{{JOURNEY_STEP_5}}</span></div>
+<div class="step"><span class="n">06</span><span class="t">{{JOURNEY_STEP_6}}</span></div>
+</div>
+<ul class="dash">
+<li>{{JOURNEY_ITEM_1}}</li>
+<li>{{JOURNEY_ITEM_2}}</li>
+<li>{{JOURNEY_ITEM_3}}</li>
+<li>{{JOURNEY_ITEM_4}}</li>
+<li>{{JOURNEY_ITEM_5}}</li>
+<li>{{JOURNEY_ITEM_6}}</li>
+</ul>
+<div class="sub-h"><span class="n">6.2</span> CTA-Matrix</div>
+<table class="tbl">
+<thead><tr><th>Funnel-Stufe</th><th>CTA</th><th>Zweck</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{JOURNEY_R1_FUNNEL_STUFE}}</td><td>{{JOURNEY_R1_CTA}}</td><td>{{JOURNEY_R1_ZWECK}}</td></tr>
+<tr><td class="lead-col">{{JOURNEY_R2_FUNNEL_STUFE}}</td><td>{{JOURNEY_R2_CTA}}</td><td>{{JOURNEY_R2_ZWECK}}</td></tr>
+<tr><td class="lead-col">{{JOURNEY_R3_FUNNEL_STUFE}}</td><td>{{JOURNEY_R3_CTA}}</td><td>{{JOURNEY_R3_ZWECK}}</td></tr>
+<tr><td class="lead-col">{{JOURNEY_R4_FUNNEL_STUFE}}</td><td>{{JOURNEY_R4_CTA}}</td><td>{{JOURNEY_R4_ZWECK}}</td></tr>
+<tr><td class="lead-col">{{JOURNEY_R5_FUNNEL_STUFE}}</td><td>{{JOURNEY_R5_CTA}}</td><td>{{JOURNEY_R5_ZWECK}}</td></tr>
+<tr><td class="lead-col">{{JOURNEY_R6_FUNNEL_STUFE}}</td><td>{{JOURNEY_R6_CTA}}</td><td>{{JOURNEY_R6_ZWECK}}</td></tr>
+</tbody>
+</table>
+<div class="pagemark"><span>{{COVER_COMPANY}}</span><span>06 — User Journey</span></div>
+</section>
+<!-- ========================================================================
+     TEIL 7 · DESIGN-RICHTUNG 2026
+     ===================================================================== -->
+<section class="part page" id="t7">
+<div class="eyebrow"><span class="part-no">07</span> Design-Richtung 2026</div>
+<h2 class="part-title">{{DESIGN_TITLE}}</h2>
+<p class="lead">{{DESIGN_LEAD}}</p>
+<table class="tbl">
+<thead><tr><th>Element</th><th>Empfehlung</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{DESIGN_T1_R1_ELEMENT}}</td><td>{{DESIGN_T1_R1_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{DESIGN_T1_R2_ELEMENT}}</td><td>{{DESIGN_T1_R2_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{DESIGN_T1_R3_ELEMENT}}</td><td>{{DESIGN_T1_R3_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{DESIGN_T1_R4_ELEMENT}}</td><td>{{DESIGN_T1_R4_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{DESIGN_T1_R5_ELEMENT}}</td><td>{{DESIGN_T1_R5_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{DESIGN_T1_R6_ELEMENT}}</td><td>{{DESIGN_T1_R6_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{DESIGN_T1_R7_ELEMENT}}</td><td>{{DESIGN_T1_R7_EMPFEHLUNG}}</td></tr>
+<tr><td class="lead-col">{{DESIGN_T1_R8_ELEMENT}}</td><td>{{DESIGN_T1_R8_EMPFEHLUNG}}</td></tr>
+</tbody>
+</table>
+<div class="sub-h"><span class="n">7.1</span> Komponenten-System</div>
+<table class="tbl">
+<thead><tr><th>Komponente</th><th>Einsatz</th><th>Interaktion</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{DESIGN_T2_R1_KOMPONENTE}}</td><td>{{DESIGN_T2_R1_EINSATZ}}</td><td>{{DESIGN_T2_R1_INTERAKTION}}</td></tr>
+<tr><td class="lead-col">{{DESIGN_T2_R2_KOMPONENTE}}</td><td>{{DESIGN_T2_R2_EINSATZ}}</td><td>{{DESIGN_T2_R2_INTERAKTION}}</td></tr>
+<tr><td class="lead-col">{{DESIGN_T2_R3_KOMPONENTE}}</td><td>{{DESIGN_T2_R3_EINSATZ}}</td><td>{{DESIGN_T2_R3_INTERAKTION}}</td></tr>
+<tr><td class="lead-col">{{DESIGN_T2_R4_KOMPONENTE}}</td><td>{{DESIGN_T2_R4_EINSATZ}}</td><td>{{DESIGN_T2_R4_INTERAKTION}}</td></tr>
+<tr><td class="lead-col">{{DESIGN_T2_R5_KOMPONENTE}}</td><td>{{DESIGN_T2_R5_EINSATZ}}</td><td>{{DESIGN_T2_R5_INTERAKTION}}</td></tr>
+<tr><td class="lead-col">{{DESIGN_T2_R6_KOMPONENTE}}</td><td>{{DESIGN_T2_R6_EINSATZ}}</td><td>{{DESIGN_T2_R6_INTERAKTION}}</td></tr>
+<tr><td class="lead-col">{{DESIGN_T2_R7_KOMPONENTE}}</td><td>{{DESIGN_T2_R7_EINSATZ}}</td><td>{{DESIGN_T2_R7_INTERAKTION}}</td></tr>
+</tbody>
+</table>
+<div class="pagemark"><span>{{COVER_COMPANY}}</span><span>07 — Design-Richtung</span></div>
+</section>
+<!-- ========================================================================
+     TEIL 8 · COPYWRITING-SYSTEM
+     ===================================================================== -->
+<section class="part page" id="t8">
+<div class="eyebrow"><span class="part-no">08</span> Copywriting-System</div>
+<h2 class="part-title">{{COPY_TITLE}}</h2>
+<div class="sub-h"><span class="n">8.1</span> Hero-Headlines</div>
+<ul class="dash">
+<li>{{COPY_ITEM_1}}</li>
+<li>{{COPY_ITEM_2}}</li>
+<li>{{COPY_ITEM_3}}</li>
+<li>{{COPY_ITEM_4}}</li>
+<li>{{COPY_ITEM_5}}</li>
+</ul>
+<div class="callout soft">
+<span class="k">8.2 · Empfohlene Subheadline</span>
+<p>{{COPY_CALLOUT_1}}</p>
+</div>
+<div class="sub-h"><span class="n">8.3</span> CTA-Texte</div>
+<table class="tbl">
+<thead><tr><th>Primärer CTA</th><th>Sekundärer CTA</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{COPY_R1_PRIMARER_CTA}}</td><td>{{COPY_R1_SEKUNDARER_CTA}}</td></tr>
+<tr><td class="lead-col">{{COPY_R2_PRIMARER_CTA}}</td><td>{{COPY_R2_SEKUNDARER_CTA}}</td></tr>
+<tr><td class="lead-col">{{COPY_R3_PRIMARER_CTA}}</td><td>{{COPY_R3_SEKUNDARER_CTA}}</td></tr>
+<tr><td class="lead-col">{{COPY_R4_PRIMARER_CTA}}</td><td>{{COPY_R4_SEKUNDARER_CTA}}</td></tr>
+<tr><td class="lead-col">{{COPY_R5_PRIMARER_CTA}}</td><td>{{COPY_R5_SEKUNDARER_CTA}}</td></tr>
+</tbody>
+</table>
+<div class="sub-h"><span class="n">8.4</span> Benefit-Bullets</div>
+<ul class="checks g2">
+<li>{{COPY_BENEFIT_1}}</li>
+<li>{{COPY_BENEFIT_2}}</li>
+<li>{{COPY_BENEFIT_3}}</li>
+<li>{{COPY_BENEFIT_4}}</li>
+<li>{{COPY_BENEFIT_5}}</li>
+<li>{{COPY_BENEFIT_6}}</li>
+</ul>
+<div class="sub-h"><span class="n">8.5</span> FAQ-Fragen</div>
+<ul class="dash">
+<li>{{COPY_ITEM_6}}</li>
+<li>{{COPY_ITEM_7}}</li>
+<li>{{COPY_ITEM_8}}</li>
+<li>{{COPY_ITEM_9}}</li>
+<li>{{COPY_ITEM_10}}</li>
+<li>{{COPY_ITEM_11}}</li>
+<li>{{COPY_ITEM_12}}</li>
+</ul>
+<div class="pagemark"><span>{{COVER_COMPANY}}</span><span>08 — Copywriting</span></div>
+</section>
+<!-- ========================================================================
+     TEIL 9 · TEXTUELLER WIREFRAME JE SEITE
+     Wiederholbares Muster: .wf > .wf-head (Meta) + .wf-body (Section-Tabelle)
+     ===================================================================== -->
+<section class="part page" id="t9">
+<div class="eyebrow"><span class="part-no">09</span> Textueller Wireframe je Seite</div>
+<h2 class="part-title">{{WIREFRAME_TITLE}}</h2>
+<p class="lead">{{WIREFRAME_LEAD}}</p>
+<!-- 9.1 HOME -->
+<div class="wf">
+<div class="wf-head">
+<span class="wf-id">9.1 · Home</span>
+<h3>{{WIREFRAME_WF1_TITLE}}</h3>
+<div class="wf-meta">
+<div><span>Ziel</span>{{WIREFRAME_WF1_ZIEL}}</div>
+<div><span>Primärer CTA</span>{{WIREFRAME_WF1_PRIMARER_CTA}}</div>
+<div><span>Sekundärer CTA</span>{{WIREFRAME_WF1_SEKUNDARER_CTA}}</div>
+</div>
+</div>
+<div class="wf-body">
+<table class="tbl">
+<thead><tr><th>Sektion</th><th>Inhalt</th><th>Visual &amp; Layout</th><th>Conversion-Ziel</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{WIREFRAME_T1_R1_SEKTION}}</td><td>{{WIREFRAME_T1_R1_INHALT}}</td><td>{{WIREFRAME_T1_R1_VISUAL_LAYOUT}}</td><td>{{WIREFRAME_T1_R1_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T1_R2_SEKTION}}</td><td>{{WIREFRAME_T1_R2_INHALT}}</td><td>{{WIREFRAME_T1_R2_VISUAL_LAYOUT}}</td><td>{{WIREFRAME_T1_R2_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T1_R3_SEKTION}}</td><td>{{WIREFRAME_T1_R3_INHALT}}</td><td>{{WIREFRAME_T1_R3_VISUAL_LAYOUT}}</td><td>{{WIREFRAME_T1_R3_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T1_R4_SEKTION}}</td><td>{{WIREFRAME_T1_R4_INHALT}}</td><td>{{WIREFRAME_T1_R4_VISUAL_LAYOUT}}</td><td>{{WIREFRAME_T1_R4_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T1_R5_SEKTION}}</td><td>{{WIREFRAME_T1_R5_INHALT}}</td><td>{{WIREFRAME_T1_R5_VISUAL_LAYOUT}}</td><td>{{WIREFRAME_T1_R5_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T1_R6_SEKTION}}</td><td>{{WIREFRAME_T1_R6_INHALT}}</td><td>{{WIREFRAME_T1_R6_VISUAL_LAYOUT}}</td><td>{{WIREFRAME_T1_R6_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T1_R7_SEKTION}}</td><td>{{WIREFRAME_T1_R7_INHALT}}</td><td>{{WIREFRAME_T1_R7_VISUAL_LAYOUT}}</td><td>{{WIREFRAME_T1_R7_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T1_R8_SEKTION}}</td><td>{{WIREFRAME_T1_R8_INHALT}}</td><td>{{WIREFRAME_T1_R8_VISUAL_LAYOUT}}</td><td>{{WIREFRAME_T1_R8_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T1_R9_SEKTION}}</td><td>{{WIREFRAME_T1_R9_INHALT}}</td><td>{{WIREFRAME_T1_R9_VISUAL_LAYOUT}}</td><td>{{WIREFRAME_T1_R9_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T1_R10_SEKTION}}</td><td>{{WIREFRAME_T1_R10_INHALT}}</td><td>{{WIREFRAME_T1_R10_VISUAL_LAYOUT}}</td><td>{{WIREFRAME_T1_R10_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T1_R11_SEKTION}}</td><td>{{WIREFRAME_T1_R11_INHALT}}</td><td>{{WIREFRAME_T1_R11_VISUAL_LAYOUT}}</td><td>{{WIREFRAME_T1_R11_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T1_R12_SEKTION}}</td><td>{{WIREFRAME_T1_R12_INHALT}}</td><td>{{WIREFRAME_T1_R12_VISUAL_LAYOUT}}</td><td>{{WIREFRAME_T1_R12_CONVERSION_ZIEL}}</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- 9.2 LEISTUNGEN -->
+<div class="wf">
+<div class="wf-head">
+<span class="wf-id">9.2 · Leistungen</span>
+<h3>{{WIREFRAME_WF2_TITLE}}</h3>
+<div class="wf-meta">
+<div><span>Ziel</span>{{WIREFRAME_WF2_ZIEL}}</div>
+<div><span>Primärer CTA</span>{{WIREFRAME_WF2_PRIMARER_CTA}}</div>
+<div><span>Sekundärer CTA</span>{{WIREFRAME_WF2_SEKUNDARER_CTA}}</div>
+</div>
+</div>
+<div class="wf-body">
+<table class="tbl">
+<thead><tr><th>Sektion</th><th>Inhalt</th><th>UI / Mobile</th><th>Conversion-Ziel</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{WIREFRAME_T2_R1_SEKTION}}</td><td>{{WIREFRAME_T2_R1_INHALT}}</td><td>{{WIREFRAME_T2_R1_UI_MOBILE}}</td><td>{{WIREFRAME_T2_R1_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T2_R2_SEKTION}}</td><td>{{WIREFRAME_T2_R2_INHALT}}</td><td>{{WIREFRAME_T2_R2_UI_MOBILE}}</td><td>{{WIREFRAME_T2_R2_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T2_R3_SEKTION}}</td><td>{{WIREFRAME_T2_R3_INHALT}}</td><td>{{WIREFRAME_T2_R3_UI_MOBILE}}</td><td>{{WIREFRAME_T2_R3_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T2_R4_SEKTION}}</td><td>{{WIREFRAME_T2_R4_INHALT}}</td><td>{{WIREFRAME_T2_R4_UI_MOBILE}}</td><td>{{WIREFRAME_T2_R4_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T2_R5_SEKTION}}</td><td>{{WIREFRAME_T2_R5_INHALT}}</td><td>{{WIREFRAME_T2_R5_UI_MOBILE}}</td><td>{{WIREFRAME_T2_R5_CONVERSION_ZIEL}}</td></tr>
+<tr><td class="lead-col">{{WIREFRAME_T2_R6_SEKTION}}</td><td>{{WIREFRAME_T2_R6_INHALT}}</td><td>{{WIREFRAME_T2_R6_UI_MOBILE}}</td><td>{{WIREFRAME_T2_R6_CONVERSION_ZIEL}}</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- 9.3–9.8 SOLUTION PAGES (kompakt als Grid) -->
+<div class="sub-h">9.3 – 9.8 · Solution Pages</div>
+<div class="grid g2">
+<div class="card accent">
+<span class="ico">9.3 · {{WIREFRAME_CARD1_LABEL}}</span>
+<h4>{{WIREFRAME_CARD1_TITLE}}</h4>
+<p>{{WIREFRAME_CARD1_TEXT1}}</p>
+</div>
+<div class="card accent">
+<span class="ico">9.4 · {{WIREFRAME_CARD2_LABEL}}</span>
+<h4>{{WIREFRAME_CARD2_TITLE}}</h4>
+<p>{{WIREFRAME_CARD2_TEXT1}}</p>
+</div>
+<div class="card accent">
+<span class="ico">9.5 · {{WIREFRAME_CARD3_LABEL}}</span>
+<h4>{{WIREFRAME_CARD3_TITLE}}</h4>
+<p>{{WIREFRAME_CARD3_TEXT1}}</p>
+</div>
+<div class="card accent">
+<span class="ico">9.6 · {{WIREFRAME_CARD4_LABEL}}</span>
+<h4>{{WIREFRAME_CARD4_TITLE}}</h4>
+<p>{{WIREFRAME_CARD4_TEXT1}}</p>
+</div>
+<div class="card accent">
+<span class="ico">9.7 · {{WIREFRAME_CARD5_LABEL}}</span>
+<h4>{{WIREFRAME_CARD5_TITLE}}</h4>
+<p>{{WIREFRAME_CARD5_TEXT1}}</p>
+</div>
+<div class="card accent">
+<span class="ico">9.8 · {{WIREFRAME_CARD6_LABEL}}</span>
+<h4>{{WIREFRAME_CARD6_TITLE}}</h4>
+<p>{{WIREFRAME_CARD6_TEXT1}}</p>
+</div>
+</div>
+<!-- 9.9–9.13 WEITERE SEITEN -->
+<div class="sub-h">9.9 – 9.13 · Branchen, Knowledge, Über, Karriere, Kontakt</div>
+<div class="grid g2">
+<div class="card">
+<span class="ico">9.9 · {{WIREFRAME_CARD7_LABEL}}</span>
+<h4>{{WIREFRAME_CARD7_TITLE}}</h4>
+<p>{{WIREFRAME_CARD7_TEXT1}}</p>
+</div>
+<div class="card">
+<span class="ico">9.10 · {{WIREFRAME_CARD8_LABEL}}</span>
+<h4>{{WIREFRAME_CARD8_TITLE}}</h4>
+<p>{{WIREFRAME_CARD8_TEXT1}}</p>
+</div>
+<div class="card">
+<span class="ico">9.11 · {{WIREFRAME_CARD9_LABEL}}</span>
+<h4>{{WIREFRAME_CARD9_TITLE}}</h4>
+<p>{{WIREFRAME_CARD9_TEXT1}}</p>
+</div>
+<div class="card">
+<span class="ico">9.12 · {{WIREFRAME_CARD10_LABEL}}</span>
+<h4>{{WIREFRAME_CARD10_TITLE}}</h4>
+<p>{{WIREFRAME_CARD10_TEXT1}}</p>
+</div>
+<div class="card">
+<span class="ico">9.13 · {{WIREFRAME_CARD11_LABEL}}</span>
+<h4>{{WIREFRAME_CARD11_TITLE}}</h4>
+<p>{{WIREFRAME_CARD11_TEXT1}}</p>
+</div>
+</div>
+<div class="pagemark"><span>{{COVER_COMPANY}}</span><span>09 — Wireframes</span></div>
+</section>
+<!-- ========================================================================
+     TEIL 10 · SEO-STRUKTUR
+     ===================================================================== -->
+<section class="part page" id="t10">
+<div class="eyebrow"><span class="part-no">10</span> SEO-Struktur</div>
+<h2 class="part-title">{{SEO_TITLE}}</h2>
+<table class="tbl">
+<thead><tr><th>Seite</th><th>Hauptkeyword</th><th>Intention</th><th>Meta-Title</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{SEO_T1_R1_SEITE}}</td><td>{{SEO_T1_R1_HAUPTKEYWORD}}</td><td>{{SEO_T1_R1_INTENTION}}</td><td>{{SEO_T1_R1_META_TITLE}}</td></tr>
+<tr><td class="lead-col">{{SEO_T1_R2_SEITE}}</td><td>{{SEO_T1_R2_HAUPTKEYWORD}}</td><td>{{SEO_T1_R2_INTENTION}}</td><td>{{SEO_T1_R2_META_TITLE}}</td></tr>
+<tr><td class="lead-col">{{SEO_T1_R3_SEITE}}</td><td>{{SEO_T1_R3_HAUPTKEYWORD}}</td><td>{{SEO_T1_R3_INTENTION}}</td><td>{{SEO_T1_R3_META_TITLE}}</td></tr>
+<tr><td class="lead-col">{{SEO_T1_R4_SEITE}}</td><td>{{SEO_T1_R4_HAUPTKEYWORD}}</td><td>{{SEO_T1_R4_INTENTION}}</td><td>{{SEO_T1_R4_META_TITLE}}</td></tr>
+<tr><td class="lead-col">{{SEO_T1_R5_SEITE}}</td><td>{{SEO_T1_R5_HAUPTKEYWORD}}</td><td>{{SEO_T1_R5_INTENTION}}</td><td>{{SEO_T1_R5_META_TITLE}}</td></tr>
+<tr><td class="lead-col">{{SEO_T1_R6_SEITE}}</td><td>{{SEO_T1_R6_HAUPTKEYWORD}}</td><td>{{SEO_T1_R6_INTENTION}}</td><td>{{SEO_T1_R6_META_TITLE}}</td></tr>
+<tr><td class="lead-col">{{SEO_T1_R7_SEITE}}</td><td>{{SEO_T1_R7_HAUPTKEYWORD}}</td><td>{{SEO_T1_R7_INTENTION}}</td><td>{{SEO_T1_R7_META_TITLE}}</td></tr>
+<tr><td class="lead-col">{{SEO_T1_R8_SEITE}}</td><td>{{SEO_T1_R8_HAUPTKEYWORD}}</td><td>{{SEO_T1_R8_INTENTION}}</td><td>{{SEO_T1_R8_META_TITLE}}</td></tr>
+<tr><td class="lead-col">{{SEO_T1_R9_SEITE}}</td><td>{{SEO_T1_R9_HAUPTKEYWORD}}</td><td>{{SEO_T1_R9_INTENTION}}</td><td>{{SEO_T1_R9_META_TITLE}}</td></tr>
+<tr><td class="lead-col">{{SEO_T1_R10_SEITE}}</td><td>{{SEO_T1_R10_HAUPTKEYWORD}}</td><td>{{SEO_T1_R10_INTENTION}}</td><td>{{SEO_T1_R10_META_TITLE}}</td></tr>
+<tr><td class="lead-col">{{SEO_T1_R11_SEITE}}</td><td>{{SEO_T1_R11_HAUPTKEYWORD}}</td><td>{{SEO_T1_R11_INTENTION}}</td><td>{{SEO_T1_R11_META_TITLE}}</td></tr>
+<tr><td class="lead-col">{{SEO_T1_R12_SEITE}}</td><td>{{SEO_T1_R12_HAUPTKEYWORD}}</td><td>{{SEO_T1_R12_INTENTION}}</td><td>{{SEO_T1_R12_META_TITLE}}</td></tr>
+<tr><td class="lead-col">{{SEO_T1_R13_SEITE}}</td><td>{{SEO_T1_R13_HAUPTKEYWORD}}</td><td>{{SEO_T1_R13_INTENTION}}</td><td>{{SEO_T1_R13_META_TITLE}}</td></tr>
+</tbody>
+</table>
+<div class="sub-h"><span class="n">10.1</span> H-Struktur-Template</div>
+<table class="tbl">
+<thead><tr><th>Seitentyp</th><th>H1</th><th>H2-Struktur</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{SEO_T2_R1_SEITENTYP}}</td><td>{{SEO_T2_R1_H1}}</td><td>{{SEO_T2_R1_H2_STRUKTUR}}</td></tr>
+<tr><td class="lead-col">{{SEO_T2_R2_SEITENTYP}}</td><td>{{SEO_T2_R2_H1}}</td><td>{{SEO_T2_R2_H2_STRUKTUR}}</td></tr>
+<tr><td class="lead-col">{{SEO_T2_R3_SEITENTYP}}</td><td>{{SEO_T2_R3_H1}}</td><td>{{SEO_T2_R3_H2_STRUKTUR}}</td></tr>
+<tr><td class="lead-col">{{SEO_T2_R4_SEITENTYP}}</td><td>{{SEO_T2_R4_H1}}</td><td>{{SEO_T2_R4_H2_STRUKTUR}}</td></tr>
+</tbody>
+</table>
+<div class="pagemark"><span>{{COVER_COMPANY}}</span><span>10 — SEO-Struktur</span></div>
+</section>
+<!-- ========================================================================
+     TEIL 11 · TECHNISCHE EMPFEHLUNGEN
+     ===================================================================== -->
+<section class="part page" id="t11">
+<div class="eyebrow"><span class="part-no">11</span> Technische Empfehlungen</div>
+<h2 class="part-title">{{TECHNIK_TITLE}}</h2>
+<div class="sub-h"><span class="n">11.1</span> CMS-Struktur</div>
+<table class="tbl">
+<thead><tr><th>Content Type</th><th>Zweck</th><th>Wichtige Felder</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{TECHNIK_T1_R1_CONTENT_TYPE}}</td><td>{{TECHNIK_T1_R1_ZWECK}}</td><td>{{TECHNIK_T1_R1_WICHTIGE_FELDER}}</td></tr>
+<tr><td class="lead-col">{{TECHNIK_T1_R2_CONTENT_TYPE}}</td><td>{{TECHNIK_T1_R2_ZWECK}}</td><td>{{TECHNIK_T1_R2_WICHTIGE_FELDER}}</td></tr>
+<tr><td class="lead-col">{{TECHNIK_T1_R3_CONTENT_TYPE}}</td><td>{{TECHNIK_T1_R3_ZWECK}}</td><td>{{TECHNIK_T1_R3_WICHTIGE_FELDER}}</td></tr>
+<tr><td class="lead-col">{{TECHNIK_T1_R4_CONTENT_TYPE}}</td><td>{{TECHNIK_T1_R4_ZWECK}}</td><td>{{TECHNIK_T1_R4_WICHTIGE_FELDER}}</td></tr>
+<tr><td class="lead-col">{{TECHNIK_T1_R5_CONTENT_TYPE}}</td><td>{{TECHNIK_T1_R5_ZWECK}}</td><td>{{TECHNIK_T1_R5_WICHTIGE_FELDER}}</td></tr>
+<tr><td class="lead-col">{{TECHNIK_T1_R6_CONTENT_TYPE}}</td><td>{{TECHNIK_T1_R6_ZWECK}}</td><td>{{TECHNIK_T1_R6_WICHTIGE_FELDER}}</td></tr>
+<tr><td class="lead-col">{{TECHNIK_T1_R7_CONTENT_TYPE}}</td><td>{{TECHNIK_T1_R7_ZWECK}}</td><td>{{TECHNIK_T1_R7_WICHTIGE_FELDER}}</td></tr>
+</tbody>
+</table>
+<div class="sub-h"><span class="n">11.2</span> Tracking &amp; Conversion</div>
+<ul class="checks g2">
+<li>{{TECHNIK_BENEFIT_1}}</li>
+<li>{{TECHNIK_BENEFIT_2}}</li>
+<li>{{TECHNIK_BENEFIT_3}}</li>
+<li>{{TECHNIK_BENEFIT_4}}</li>
+<li>{{TECHNIK_BENEFIT_5}}</li>
+<li>{{TECHNIK_BENEFIT_6}}</li>
+<li>{{TECHNIK_BENEFIT_7}}</li>
+</ul>
+<div class="sub-h"><span class="n">11.3</span> Lead-Flows</div>
+<table class="tbl">
+<thead><tr><th>Flow</th><th>Zweck</th><th>Hinweis</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{TECHNIK_T2_R1_FLOW}}</td><td>{{TECHNIK_T2_R1_ZWECK}}</td><td>{{TECHNIK_T2_R1_HINWEIS}}</td></tr>
+<tr><td class="lead-col">{{TECHNIK_T2_R2_FLOW}}</td><td>{{TECHNIK_T2_R2_ZWECK}}</td><td>{{TECHNIK_T2_R2_HINWEIS}}</td></tr>
+<tr><td class="lead-col">{{TECHNIK_T2_R3_FLOW}}</td><td>{{TECHNIK_T2_R3_ZWECK}}</td><td>{{TECHNIK_T2_R3_HINWEIS}}</td></tr>
+<tr><td class="lead-col">{{TECHNIK_T2_R4_FLOW}}</td><td>{{TECHNIK_T2_R4_ZWECK}}</td><td>{{TECHNIK_T2_R4_HINWEIS}}</td></tr>
+<tr><td class="lead-col">{{TECHNIK_T2_R5_FLOW}}</td><td>{{TECHNIK_T2_R5_ZWECK}}</td><td>{{TECHNIK_T2_R5_HINWEIS}}</td></tr>
+</tbody>
+</table>
+<div class="sub-h"><span class="n">11.4</span> Performance &amp; UX</div>
+<ul class="checks g2">
+<li>{{TECHNIK_BENEFIT_8}}</li>
+<li>{{TECHNIK_BENEFIT_9}}</li>
+<li>{{TECHNIK_BENEFIT_10}}</li>
+<li>{{TECHNIK_BENEFIT_11}}</li>
+<li>{{TECHNIK_BENEFIT_12}}</li>
+<li>{{TECHNIK_BENEFIT_13}}</li>
+<li>{{TECHNIK_BENEFIT_14}}</li>
+</ul>
+<div class="pagemark"><span>{{COVER_COMPANY}}</span><span>11 — Technik</span></div>
+</section>
+<!-- ========================================================================
+     TEIL 12 · UMSETZUNGSPAKET
+     ===================================================================== -->
+<section class="part page" id="t12">
+<div class="eyebrow"><span class="part-no">12</span> Umsetzungspaket</div>
+<h2 class="part-title">{{UMSETZUNG_TITLE}}</h2>
+<div class="sub-h"><span class="n">12.1</span> Design-Delivery-Struktur</div>
+<table class="tbl">
+<thead><tr><th>Figma Page</th><th>Inhalt</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{UMSETZUNG_T1_R1_FIGMA_PAGE}}</td><td>{{UMSETZUNG_T1_R1_INHALT}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T1_R2_FIGMA_PAGE}}</td><td>{{UMSETZUNG_T1_R2_INHALT}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T1_R3_FIGMA_PAGE}}</td><td>{{UMSETZUNG_T1_R3_INHALT}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T1_R4_FIGMA_PAGE}}</td><td>{{UMSETZUNG_T1_R4_INHALT}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T1_R5_FIGMA_PAGE}}</td><td>{{UMSETZUNG_T1_R5_INHALT}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T1_R6_FIGMA_PAGE}}</td><td>{{UMSETZUNG_T1_R6_INHALT}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T1_R7_FIGMA_PAGE}}</td><td>{{UMSETZUNG_T1_R7_INHALT}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T1_R8_FIGMA_PAGE}}</td><td>{{UMSETZUNG_T1_R8_INHALT}}</td></tr>
+</tbody>
+</table>
+<div class="sub-h"><span class="n">12.2</span> Entwicklungsprioritäten</div>
+<div class="timeline">
+<div class="step"><span class="n">01</span><span class="t">{{UMSETZUNG_STEP_1}}</span></div>
+<div class="step"><span class="n">02</span><span class="t">{{UMSETZUNG_STEP_2}}</span></div>
+<div class="step"><span class="n">03</span><span class="t">{{UMSETZUNG_STEP_3}}</span></div>
+<div class="step"><span class="n">04</span><span class="t">{{UMSETZUNG_STEP_4}}</span></div>
+</div>
+<ul class="dash">
+<li>{{UMSETZUNG_ITEM_1}}</li>
+<li>{{UMSETZUNG_ITEM_2}}</li>
+<li>{{UMSETZUNG_ITEM_3}}</li>
+<li>{{UMSETZUNG_ITEM_4}}</li>
+</ul>
+<div class="sub-h"><span class="n">12.3</span> Finale Wireframe-Struktur in Kurzform</div>
+<table class="tbl">
+<thead><tr><th>Seite</th><th>Section-Reihenfolge</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{UMSETZUNG_T2_R1_SEITE}}</td><td>{{UMSETZUNG_T2_R1_SECTION_REIHENFOLGE}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T2_R2_SEITE}}</td><td>{{UMSETZUNG_T2_R2_SECTION_REIHENFOLGE}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T2_R3_SEITE}}</td><td>{{UMSETZUNG_T2_R3_SECTION_REIHENFOLGE}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T2_R4_SEITE}}</td><td>{{UMSETZUNG_T2_R4_SECTION_REIHENFOLGE}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T2_R5_SEITE}}</td><td>{{UMSETZUNG_T2_R5_SECTION_REIHENFOLGE}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T2_R6_SEITE}}</td><td>{{UMSETZUNG_T2_R6_SECTION_REIHENFOLGE}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T2_R7_SEITE}}</td><td>{{UMSETZUNG_T2_R7_SECTION_REIHENFOLGE}}</td></tr>
+<tr><td class="lead-col">{{UMSETZUNG_T2_R8_SEITE}}</td><td>{{UMSETZUNG_T2_R8_SECTION_REIHENFOLGE}}</td></tr>
+</tbody>
+</table>
+<div class="callout">
+<span class="k">Nächster sinnvoller Schritt</span>
+<p>{{UMSETZUNG_CALLOUT_1}}</p>
+</div>
+<div class="pagemark"><span>{{COVER_COMPANY}}</span><span>12 — Umsetzungspaket</span></div>
+</section>
+<!-- ========================================================================
+     ANHANG · QUELLEN
+     ===================================================================== -->
+<section class="part page">
+<div class="eyebrow">Anhang</div>
+<h2 class="part-title">{{ANHANG_TITLE}}</h2>
+<p class="lead">{{ANHANG_LEAD}}</p>
+<table class="tbl">
+<thead><tr><th>Quelle / Bereich</th><th>Verwendung im Konzept</th></tr></thead>
+<tbody>
+<tr><td class="lead-col">{{ANHANG_R1_QUELLE_BEREICH}}</td><td>{{ANHANG_R1_VERWENDUNG_IM_KONZEPT}}</td></tr>
+<tr><td class="lead-col">{{ANHANG_R2_QUELLE_BEREICH}}</td><td>{{ANHANG_R2_VERWENDUNG_IM_KONZEPT}}</td></tr>
+<tr><td class="lead-col">{{ANHANG_R3_QUELLE_BEREICH}}</td><td>{{ANHANG_R3_VERWENDUNG_IM_KONZEPT}}</td></tr>
+<tr><td class="lead-col">{{ANHANG_R4_QUELLE_BEREICH}}</td><td>{{ANHANG_R4_VERWENDUNG_IM_KONZEPT}}</td></tr>
+<tr><td class="lead-col">{{ANHANG_R5_QUELLE_BEREICH}}</td><td>{{ANHANG_R5_VERWENDUNG_IM_KONZEPT}}</td></tr>
+<tr><td class="lead-col">{{ANHANG_R6_QUELLE_BEREICH}}</td><td>{{ANHANG_R6_VERWENDUNG_IM_KONZEPT}}</td></tr>
+<tr><td class="lead-col">{{ANHANG_R7_QUELLE_BEREICH}}</td><td>{{ANHANG_R7_VERWENDUNG_IM_KONZEPT}}</td></tr>
+<tr><td class="lead-col">{{ANHANG_R8_QUELLE_BEREICH}}</td><td>{{ANHANG_R8_VERWENDUNG_IM_KONZEPT}}</td></tr>
+<tr><td class="lead-col">{{ANHANG_R9_QUELLE_BEREICH}}</td><td>{{ANHANG_R9_VERWENDUNG_IM_KONZEPT}}</td></tr>
+<tr><td class="lead-col">{{ANHANG_R10_QUELLE_BEREICH}}</td><td>{{ANHANG_R10_VERWENDUNG_IM_KONZEPT}}</td></tr>
+<tr><td class="lead-col">{{ANHANG_R11_QUELLE_BEREICH}}</td><td>{{ANHANG_R11_VERWENDUNG_IM_KONZEPT}}</td></tr>
+</tbody>
+</table>
+</section>
+<footer class="doc-foot">{{FOOT_TEXT}}</footer>
+
+
+<!--
+
+  ============================================================================
+  PLATZHALTER-REFERENZ  ({{NAME}} = Kontext · Beispielinhalt)
+  ============================================================================
+  Key-Grammatik:  <KAPITEL>_<TYP>[_<DETAIL>]
+    KAPITEL: COVER, EXEC, ANALYSE, ZIELGRUPPEN, POSITION, SITEMAP, JOURNEY,
+             DESIGN, COPY, WIREFRAME, SEO, TECHNIK, UMSETZUNG, ANHANG
+    TYP:     TITLE, LEAD, PARA_n, CALLOUT_n, CARDn_TITLE/_TEXTn/_LABEL,
+             BENEFIT_n, ITEM_n, STEP_n, WFn_TITLE/_<META>, R<zeile>_<SPALTE>
+  ----------------------------------------------------------------------------
+  FARBEN (CSS-Hex):
+  {{BRAND_PRIMARY}}  —  Primaerfarbe (CSS-Hex) – Deckblatt, Panels, Headings  ·  Default: #0B1F3A
+  {{BRAND_ACCENT}}  —  Akzentfarbe (CSS-Hex) – Kicker, Marker, CTA, Linien  ·  Default: #2E6F8E
+  INHALTE:
+  {{COVER_COMPANY}}  —  Firmenname (legal)  ·  z. B.: CVA Services GmbH
+  {{COVER_TITLE}}  —  Dokumenttitel  ·  z. B.: Website-Konzept & Conversion-Wireframe 2026
+  {{COVER_SUBTITLE}}  —  Untertitel / Ausgabezweck  ·  z. B.: Premium-Website-Struktur für Live-Webseiten-Generierung, UI-Design und Entwicklu…
+  {{COVER_STRATEGIC}}  —  Strategischer Kern (2-4 Saetze)  ·  z. B.: CVA Services wird als spezialisierte Financial-Transformation-Boutique positioni…
+  {{COVER_META_WEBSITE}}  —  Deckblatt-Meta: Website  ·  z. B.: cva-services.eu/de
+  {{COVER_META_INPUT_BASIS}}  —  Deckblatt-Meta: Input-Basis  ·  z. B.: Öffentlich sichtbare Website
+  {{COVER_META_METHODIK}}  —  Deckblatt-Meta: Methodik  ·  z. B.: Keine erfundenen Zielgruppen, USPs oder Zitate
+  {{COVER_META_AUSGABEZWECK}}  —  Deckblatt-Meta: Ausgabezweck  ·  z. B.: Figma · Copy · SEO · CMS · Implementierung
+  {{EXEC_TITLE}}  —  EXEC: Kapitel-Headline  ·  z. B.: Substanz ist da. Die Conversion-Führung fehlt.
+  {{EXEC_LEAD}}  —  EXEC: Kapitel-Lead  ·  z. B.: Die Website hat fachliche Tiefe und eine klare Spezialisierung. Die Leistungen
+ …
+  {{EXEC_CALLOUT_1}}  —  EXEC: Callout 'Zentrale Conversion-These'  ·  z. B.: CVA muss nicht mehr Expertise beweisen, sondern die Expertise so strukturieren, …
+  {{EXEC_R1_BEREICH}}  —  EXEC: Tabelle, Spalte 'Bereich', Zeile 1  ·  z. B.: Positionierung
+  {{EXEC_R1_BEFUND}}  —  EXEC: Tabelle, Spalte 'Befund', Zeile 1  ·  z. B.: Fachlich stark, teilweise abstrakt formuliert.
+  {{EXEC_R1_EMPFEHLUNG}}  —  EXEC: Tabelle, Spalte 'Empfehlung', Zeile 1  ·  z. B.: CVA als Umsetzungsboutique für regulatorische Financial Transformation schärfen.
+  {{EXEC_R2_BEREICH}}  —  EXEC: Tabelle, Spalte 'Bereich', Zeile 2  ·  z. B.: Conversion
+  {{EXEC_R2_BEFUND}}  —  EXEC: Tabelle, Spalte 'Befund', Zeile 2  ·  z. B.: Kontakt möglich, aber kein qualifizierter Lead-Flow.
+  {{EXEC_R2_EMPFEHLUNG}}  —  EXEC: Tabelle, Spalte 'Empfehlung', Zeile 2  ·  z. B.: Projekt-Diagnose, Terminlogik und thematisches Formular einbauen.
+  {{EXEC_R3_BEREICH}}  —  EXEC: Tabelle, Spalte 'Bereich', Zeile 3  ·  z. B.: Navigation
+  {{EXEC_R3_BEFUND}}  —  EXEC: Tabelle, Spalte 'Befund', Zeile 3  ·  z. B.: Viele Inhalte, wenig Entscheidungsarchitektur.
+  {{EXEC_R3_EMPFEHLUNG}}  —  EXEC: Tabelle, Spalte 'Empfehlung', Zeile 3  ·  z. B.: Nach Leistungen, Branchen und Knowledge-Clustern strukturieren.
+  {{EXEC_R4_BEREICH}}  —  EXEC: Tabelle, Spalte 'Bereich', Zeile 4  ·  z. B.: Trust
+  {{EXEC_R4_BEFUND}}  —  EXEC: Tabelle, Spalte 'Befund', Zeile 4  ·  z. B.: Kompetenz, Historie und Software-Know-how vorhanden.
+  {{EXEC_R4_EMPFEHLUNG}}  —  EXEC: Tabelle, Spalte 'Empfehlung', Zeile 4  ·  z. B.: Proof-Bar, Rollenmodell, Ansprechpartner und Deliverables sichtbar machen.
+  {{EXEC_R5_BEREICH}}  —  EXEC: Tabelle, Spalte 'Bereich', Zeile 5  ·  z. B.: Content
+  {{EXEC_R5_BEFUND}}  —  EXEC: Tabelle, Spalte 'Befund', Zeile 5  ·  z. B.: Knowledge-Bereich mit alten, fachlichen Inhalten.
+  {{EXEC_R5_EMPFEHLUNG}}  —  EXEC: Tabelle, Spalte 'Empfehlung', Zeile 5  ·  z. B.: Archiv kennzeichnen, neue Executive Briefings als Lead-Nurturing nutzen.
+  {{EXEC_R6_BEREICH}}  —  EXEC: Tabelle, Spalte 'Bereich', Zeile 6  ·  z. B.: Design
+  {{EXEC_R6_BEFUND}}  —  EXEC: Tabelle, Spalte 'Befund', Zeile 6  ·  z. B.: Aktuelle Wirkung weniger premium und modern.
+  {{EXEC_R6_EMPFEHLUNG}}  —  EXEC: Tabelle, Spalte 'Empfehlung', Zeile 6  ·  z. B.: Editorial-Financial-Design mit Data/UI-Motiven und großzügigem Weißraum.
+  {{ANALYSE_TITLE}}  —  ANALYSE: Kapitel-Headline  ·  z. B.: Wo Vertrauen entsteht – und wo es verloren geht.
+  {{ANALYSE_R1_ELEMENT}}  —  ANALYSE: Tabelle, Spalte 'Element', Zeile 1  ·  z. B.: Hero
+  {{ANALYSE_R1_BEFUND}}  —  ANALYSE: Tabelle, Spalte 'Befund', Zeile 1  ·  z. B.: „Managing Financial Transformation“ – stark, aber abstrakt.
+  {{ANALYSE_R1_RISIKO}}  —  ANALYSE: Tabelle, Spalte 'Risiko', Zeile 1  ·  z. B.: Nutzen und Problemfit nicht sofort verständlich.
+  {{ANALYSE_R1_EMPFEHLUNG}}  —  ANALYSE: Tabelle, Spalte 'Empfehlung', Zeile 1  ·  z. B.: Hero konkretisieren: Regulatorik in Prozesse, Analysen und IT überführen.
+  {{ANALYSE_R2_ELEMENT}}  —  ANALYSE: Tabelle, Spalte 'Element', Zeile 2  ·  z. B.: Leistungen
+  {{ANALYSE_R2_BEFUND}}  —  ANALYSE: Tabelle, Spalte 'Befund', Zeile 2  ·  z. B.: Breite Angebotslogik.
+  {{ANALYSE_R2_RISIKO}}  —  ANALYSE: Tabelle, Spalte 'Risiko', Zeile 2  ·  z. B.: Wirken nicht kaufentscheidend.
+  {{ANALYSE_R2_EMPFEHLUNG}}  —  ANALYSE: Tabelle, Spalte 'Empfehlung', Zeile 2  ·  z. B.: Jede Leistung als Solution Page: Problem, Ansatz, Deliverables, Proof, CTA.
+  {{ANALYSE_R3_ELEMENT}}  —  ANALYSE: Tabelle, Spalte 'Element', Zeile 3  ·  z. B.: Navigation
+  {{ANALYSE_R3_BEFUND}}  —  ANALYSE: Tabelle, Spalte 'Befund', Zeile 3  ·  z. B.: Viele Unterpunkte und Fachthemen.
+  {{ANALYSE_R3_RISIKO}}  —  ANALYSE: Tabelle, Spalte 'Risiko', Zeile 3  ·  z. B.: Hohe kognitive Last.
+  {{ANALYSE_R3_EMPFEHLUNG}}  —  ANALYSE: Tabelle, Spalte 'Empfehlung', Zeile 3  ·  z. B.: Mega-Menü mit Leistungen, Branchen und Knowledge-Clustern.
+  {{ANALYSE_R4_ELEMENT}}  —  ANALYSE: Tabelle, Spalte 'Element', Zeile 4  ·  z. B.: Trust
+  {{ANALYSE_R4_BEFUND}}  —  ANALYSE: Tabelle, Spalte 'Befund', Zeile 4  ·  z. B.: Historie, Rollen, Know-how vorhanden.
+  {{ANALYSE_R4_RISIKO}}  —  ANALYSE: Tabelle, Spalte 'Risiko', Zeile 4  ·  z. B.: Proof nicht schnell erfassbar.
+  {{ANALYSE_R4_EMPFEHLUNG}}  —  ANALYSE: Tabelle, Spalte 'Empfehlung', Zeile 4  ·  z. B.: Trust-Bar, Rollenmodell, Software-Know-how, Ansprechpartner, Prozess.
+  {{ANALYSE_R5_ELEMENT}}  —  ANALYSE: Tabelle, Spalte 'Element', Zeile 5  ·  z. B.: Kontakt
+  {{ANALYSE_R5_BEFUND}}  —  ANALYSE: Tabelle, Spalte 'Befund', Zeile 5  ·  z. B.: Telefon und E-Mail vorhanden.
+  {{ANALYSE_R5_RISIKO}}  —  ANALYSE: Tabelle, Spalte 'Risiko', Zeile 5  ·  z. B.: Zu wenig Lead-Qualifizierung.
+  {{ANALYSE_R5_EMPFEHLUNG}}  —  ANALYSE: Tabelle, Spalte 'Empfehlung', Zeile 5  ·  z. B.: Projektformular: Thema, Phase, Unternehmen, Upload, Booking.
+  {{ANALYSE_R6_ELEMENT}}  —  ANALYSE: Tabelle, Spalte 'Element', Zeile 6  ·  z. B.: Karriere
+  {{ANALYSE_R6_BEFUND}}  —  ANALYSE: Tabelle, Spalte 'Befund', Zeile 6  ·  z. B.: Rollen als PDF-Stellenanzeigen.
+  {{ANALYSE_R6_RISIKO}}  —  ANALYSE: Tabelle, Spalte 'Risiko', Zeile 6  ·  z. B.: PDF-only wirkt unmodern, schwach für SEO.
+  {{ANALYSE_R6_EMPFEHLUNG}}  —  ANALYSE: Tabelle, Spalte 'Empfehlung', Zeile 6  ·  z. B.: HTML-Jobseiten plus PDF-Download.
+  {{ANALYSE_ITEM_1}}  —  ANALYSE: Listenpunkt  ·  z. B.: Keine echten Kundenzitate oder Sales-Formulierungen vorhanden.
+  {{ANALYSE_ITEM_2}}  —  ANALYSE: Listenpunkt  ·  z. B.: Keine konkreten Case Studies oder quantitativen Projektergebnisse vorhanden.
+  {{ANALYSE_ITEM_3}}  —  ANALYSE: Listenpunkt  ·  z. B.: Keine freigegebenen Kundenlogos vorhanden.
+  {{ANALYSE_ITEM_4}}  —  ANALYSE: Listenpunkt  ·  z. B.: Keine Ansprechpartner-Fotos oder Teamdaten im Input enthalten.
+  {{ANALYSE_ITEM_5}}  —  ANALYSE: Listenpunkt  ·  z. B.: Keine CRM-, Tracking- oder bestehenden Funnel-Daten vorhanden.
+  {{ANALYSE_PARA_1}}  —  ANALYSE: Fliesstext-Absatz 1  ·  z. B.: CVA Services positioniert sich als Beratung für Financial Services mit Fokus auf…
+  {{ZIELGRUPPEN_TITLE}}  —  ZIELGRUPPEN: Kapitel-Headline  ·  z. B.: Wer kauft, warum gekauft wird, was den Ausschlag gibt.
+  {{ZIELGRUPPEN_T1_R1_ZIELGRUPPE}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Zielgruppe', Zeile 1  ·  z. B.: Banken
+  {{ZIELGRUPPEN_T1_R1_TYPISCHE_AUFGABE}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Typische Aufgabe', Zeile 1  ·  z. B.: Regulatorik, Risk, Reporting, Trading- und Risikosysteme.
+  {{ZIELGRUPPEN_T1_R1_CONVERSION_RELEVANZ}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Conversion-Relevanz', Zeile 1  ·  z. B.: Primäre B2B-Zielgruppe, hohe Projektwahrscheinlichkeit.
+  {{ZIELGRUPPEN_T1_R2_ZIELGRUPPE}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Zielgruppe', Zeile 2  ·  z. B.: Versicherer
+  {{ZIELGRUPPEN_T1_R2_TYPISCHE_AUFGABE}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Typische Aufgabe', Zeile 2  ·  z. B.: Risikomanagement, Bewertung, Governance, Regulatorik.
+  {{ZIELGRUPPEN_T1_R2_CONVERSION_RELEVANZ}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Conversion-Relevanz', Zeile 2  ·  z. B.: Sekundär, Bedarf an belastbarer Umsetzung.
+  {{ZIELGRUPPEN_T1_R3_ZIELGRUPPE}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Zielgruppe', Zeile 3  ·  z. B.: Asset Manager / KVGs
+  {{ZIELGRUPPEN_T1_R3_TYPISCHE_AUFGABE}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Typische Aufgabe', Zeile 3  ·  z. B.: MiFID, PRIIPs, Reporting, Valuation, Governance.
+  {{ZIELGRUPPEN_T1_R3_CONVERSION_RELEVANZ}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Conversion-Relevanz', Zeile 3  ·  z. B.: Hohe Suchintention bei spezifischen Regulatorikthemen.
+  {{ZIELGRUPPEN_T1_R4_ZIELGRUPPE}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Zielgruppe', Zeile 4  ·  z. B.: FinTechs
+  {{ZIELGRUPPEN_T1_R4_TYPISCHE_AUFGABE}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Typische Aufgabe', Zeile 4  ·  z. B.: Skalierung, regulatorische Umsetzung, Systemintegration.
+  {{ZIELGRUPPEN_T1_R4_CONVERSION_RELEVANZ}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Conversion-Relevanz', Zeile 4  ·  z. B.: Wachstumsprojekte, hoher Beratungsbedarf.
+  {{ZIELGRUPPEN_T1_R5_ZIELGRUPPE}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Zielgruppe', Zeile 5  ·  z. B.: Service- & Softwareunternehmen
+  {{ZIELGRUPPEN_T1_R5_TYPISCHE_AUFGABE}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Typische Aufgabe', Zeile 5  ·  z. B.: Systemimplementierung, DACH-Rollouts, Provider Management.
+  {{ZIELGRUPPEN_T1_R5_CONVERSION_RELEVANZ}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Conversion-Relevanz', Zeile 5  ·  z. B.: Partner- und Projektgeschäft.
+  {{ZIELGRUPPEN_T1_R6_ZIELGRUPPE}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Zielgruppe', Zeile 6  ·  z. B.: Kandidaten
+  {{ZIELGRUPPEN_T1_R6_TYPISCHE_AUFGABE}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Typische Aufgabe', Zeile 6  ·  z. B.: Einstieg als Financial Engineer, Business Analyst, Integration Engineer.
+  {{ZIELGRUPPEN_T1_R6_CONVERSION_RELEVANZ}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Conversion-Relevanz', Zeile 6  ·  z. B.: Eigenständiger Recruiting-Funnel.
+  {{ZIELGRUPPEN_T2_R1_EINWAND}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Einwand', Zeile 1  ·  z. B.: Wird das nur ein Konzeptprojekt?
+  {{ZIELGRUPPEN_T2_R1_WEBSITE_ANTWORT}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Website-Antwort', Zeile 1  ·  z. B.: Betonung finaler Implementierung und operativer Umsetzung.
+  {{ZIELGRUPPEN_T2_R1_CONVERSION_ELEMENT}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Conversion-Element', Zeile 1  ·  z. B.: Deliverables + Prozessdiagramm + CTA „Umsetzung besprechen“.
+  {{ZIELGRUPPEN_T2_R2_EINWAND}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Einwand', Zeile 2  ·  z. B.: Versteht der Berater unsere IT?
+  {{ZIELGRUPPEN_T2_R2_WEBSITE_ANTWORT}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Website-Antwort', Zeile 2  ·  z. B.: Integration Engineers und Systemimplementierung als zentrale Profile.
+  {{ZIELGRUPPEN_T2_R2_CONVERSION_ELEMENT}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Conversion-Element', Zeile 2  ·  z. B.: Rollenmodell + Systemlandschaft-Visual.
+  {{ZIELGRUPPEN_T2_R3_EINWAND}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Einwand', Zeile 3  ·  z. B.: Ist das regulatorisch belastbar?
+  {{ZIELGRUPPEN_T2_R3_WEBSITE_ANTWORT}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Website-Antwort', Zeile 3  ·  z. B.: Intensive Auseinandersetzung mit internationalen Regulierern.
+  {{ZIELGRUPPEN_T2_R3_CONVERSION_ELEMENT}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Conversion-Element', Zeile 3  ·  z. B.: Authority-Trust-Bar + Methodik + Dokumentationsmodul.
+  {{ZIELGRUPPEN_T2_R4_EINWAND}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Einwand', Zeile 4  ·  z. B.: Passt CVA zu unserer Branche?
+  {{ZIELGRUPPEN_T2_R4_WEBSITE_ANTWORT}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Website-Antwort', Zeile 4  ·  z. B.: Mehrere Financial-Services-Zielgruppen genannt.
+  {{ZIELGRUPPEN_T2_R4_CONVERSION_ELEMENT}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Conversion-Element', Zeile 4  ·  z. B.: Branchen-Landingpages.
+  {{ZIELGRUPPEN_T2_R5_EINWAND}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Einwand', Zeile 5  ·  z. B.: Ist das Know-how aktuell?
+  {{ZIELGRUPPEN_T2_R5_WEBSITE_ANTWORT}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Website-Antwort', Zeile 5  ·  z. B.: Teile des Knowledge-Bereichs wirken alt.
+  {{ZIELGRUPPEN_T2_R5_CONVERSION_ELEMENT}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Conversion-Element', Zeile 5  ·  z. B.: Aktuelles Knowledge Center + Archiv-Label + neue Briefings.
+  {{ZIELGRUPPEN_T2_R6_EINWAND}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Einwand', Zeile 6  ·  z. B.: Wie beginnt die Zusammenarbeit?
+  {{ZIELGRUPPEN_T2_R6_WEBSITE_ANTWORT}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Website-Antwort', Zeile 6  ·  z. B.: Aktuell wenig explizit.
+  {{ZIELGRUPPEN_T2_R6_CONVERSION_ELEMENT}}  —  ZIELGRUPPEN: Tabelle, Spalte 'Conversion-Element', Zeile 6  ·  z. B.: 30-Minuten-Diagnose, Projektphasen-Dropdown, Rückmeldelogik.
+  {{ZIELGRUPPEN_CARD1_LABEL}}  —  ZIELGRUPPEN: Card-Label  ·  z. B.: Autorität
+  {{ZIELGRUPPEN_CARD1_TITLE}}  —  ZIELGRUPPEN: Card-Titel  ·  z. B.: Regulatorische Sicherheit
+  {{ZIELGRUPPEN_CARD1_TEXT1}}  —  ZIELGRUPPEN: Card-Text  ·  z. B.: Auseinandersetzung mit BIZ, ESMA, EBA und regulatorischen Entwicklungen.
+  {{ZIELGRUPPEN_CARD2_LABEL}}  —  ZIELGRUPPEN: Card-Label  ·  z. B.: Audit-Fähigkeit
+  {{ZIELGRUPPEN_CARD2_TITLE}}  —  ZIELGRUPPEN: Card-Titel  ·  z. B.: Prüferverwertbarkeit
+  {{ZIELGRUPPEN_CARD2_TEXT1}}  —  ZIELGRUPPEN: Card-Text  ·  z. B.: Dokumente und Analysen sollen regulatorisch belastbar sein.
+  {{ZIELGRUPPEN_CARD3_LABEL}}  —  ZIELGRUPPEN: Card-Label  ·  z. B.: Ergebnis
+  {{ZIELGRUPPEN_CARD3_TITLE}}  —  ZIELGRUPPEN: Card-Titel  ·  z. B.: Umsetzung statt Konzept
+  {{ZIELGRUPPEN_CARD3_TEXT1}}  —  ZIELGRUPPEN: Card-Text  ·  z. B.: Implementierung in Prozesse und IT statt reiner Konzeption.
+  {{ZIELGRUPPEN_CARD4_LABEL}}  —  ZIELGRUPPEN: Card-Label  ·  z. B.: Sicherheit
+  {{ZIELGRUPPEN_CARD4_TITLE}}  —  ZIELGRUPPEN: Card-Titel  ·  z. B.: Make-or-Buy
+  {{ZIELGRUPPEN_CARD4_TEXT1}}  —  ZIELGRUPPEN: Card-Text  ·  z. B.: Fundierte Unterstützung bei Make-or-Buy-Entscheidungen.
+  {{ZIELGRUPPEN_CARD5_LABEL}}  —  ZIELGRUPPEN: Card-Label  ·  z. B.: Schnittstelle
+  {{ZIELGRUPPEN_CARD5_TITLE}}  —  ZIELGRUPPEN: Card-Titel  ·  z. B.: Fach-IT-Brücke
+  {{ZIELGRUPPEN_CARD5_TEXT1}}  —  ZIELGRUPPEN: Card-Text  ·  z. B.: Financial Engineering, Business Analysis und Integration Engineering kombiniert.
+  {{ZIELGRUPPEN_CARD6_LABEL}}  —  ZIELGRUPPEN: Card-Label  ·  z. B.: Wirtschaftlich
+  {{ZIELGRUPPEN_CARD6_TITLE}}  —  ZIELGRUPPEN: Card-Titel  ·  z. B.: Effizienz
+  {{ZIELGRUPPEN_CARD6_TEXT1}}  —  ZIELGRUPPEN: Card-Text  ·  z. B.: Modernisierung ohne unnötige Lizenz- und Implementierungskosten.
+  {{ZIELGRUPPEN_BENEFIT_1}}  —  ZIELGRUPPEN: Benefit-/Check-Bullet  ·  z. B.: Autorität: Regulatorik, BIZ/ESMA/EBA, komplexe Finanzmarktinfrastruktur.
+  {{ZIELGRUPPEN_BENEFIT_2}}  —  ZIELGRUPPEN: Benefit-/Check-Bullet  ·  z. B.: Risikoreduktion: prüferverwertbare Dokumentation, Testing, Fach-/DV-Konzepte.
+  {{ZIELGRUPPEN_BENEFIT_3}}  —  ZIELGRUPPEN: Benefit-/Check-Bullet  ·  z. B.: Klarheit: klare Deliverables statt abstrakter Beratungsversprechen.
+  {{ZIELGRUPPEN_BENEFIT_4}}  —  ZIELGRUPPEN: Benefit-/Check-Bullet  ·  z. B.: Spezialisierung: Financial Services statt generischer Managementberatung.
+  {{ZIELGRUPPEN_BENEFIT_5}}  —  ZIELGRUPPEN: Benefit-/Check-Bullet  ·  z. B.: Kontrolle: Vorgehensmodell und Projektphasen machen Komplexität beherrschbar.
+  {{ZIELGRUPPEN_BENEFIT_6}}  —  ZIELGRUPPEN: Benefit-/Check-Bullet  ·  z. B.: Nächster Schritt: schneller Themenfit über Formular oder Terminbuchung.
+  {{POSITION_TITLE}}  —  POSITION: Kapitel-Headline  ·  z. B.: Von Regulatorik zu operativer Wirkung.
+  {{POSITION_CALLOUT_1}}  —  POSITION: Callout '4.1 · Positionierungsstatement'  ·  z. B.: CVA Services übersetzt regulatorische Anforderungen in prüferverwertbare Prozess…
+  {{POSITION_R1_USP}}  —  POSITION: Tabelle, Spalte 'USP', Zeile 1  ·  z. B.: Interdisziplinäre Teams
+  {{POSITION_R1_BELEGBARKEIT}}  —  POSITION: Tabelle, Spalte 'Belegbarkeit', Zeile 1  ·  z. B.: Financial Engineers, Business Analysts, Integration Engineers genannt.
+  {{POSITION_R1_WEBSITE_KOMMUNIKATION}}  —  POSITION: Tabelle, Spalte 'Website-Kommunikation', Zeile 1  ·  z. B.: Fachlich, quantitativ und technisch in einem Projektteam.
+  {{POSITION_R2_USP}}  —  POSITION: Tabelle, Spalte 'USP', Zeile 2  ·  z. B.: Fokus auf Implementierung
+  {{POSITION_R2_BELEGBARKEIT}}  —  POSITION: Tabelle, Spalte 'Belegbarkeit', Zeile 2  ·  z. B.: Service- und Angebotsseiten betonen Umsetzung.
+  {{POSITION_R2_WEBSITE_KOMMUNIKATION}}  —  POSITION: Tabelle, Spalte 'Website-Kommunikation', Zeile 2  ·  z. B.: Von der Anforderung bis zur produktiven Umsetzung.
+  {{POSITION_R3_USP}}  —  POSITION: Tabelle, Spalte 'USP', Zeile 3  ·  z. B.: Regulatorik-Kompetenz
+  {{POSITION_R3_BELEGBARKEIT}}  —  POSITION: Tabelle, Spalte 'Belegbarkeit', Zeile 3  ·  z. B.: BIZ, ESMA und EBA als relevante Institutionen genannt.
+  {{POSITION_R3_WEBSITE_KOMMUNIKATION}}  —  POSITION: Tabelle, Spalte 'Website-Kommunikation', Zeile 3  ·  z. B.: Regulatorische Entwicklungen früh verstehen, pragmatisch umsetzen.
+  {{POSITION_R4_USP}}  —  POSITION: Tabelle, Spalte 'USP', Zeile 4  ·  z. B.: Software- & Provider-Know-how
+  {{POSITION_R4_BELEGBARKEIT}}  —  POSITION: Tabelle, Spalte 'Belegbarkeit', Zeile 4  ·  z. B.: Service Implementation nennt Standardsysteme und Provider Management.
+  {{POSITION_R4_WEBSITE_KOMMUNIKATION}}  —  POSITION: Tabelle, Spalte 'Website-Kommunikation', Zeile 4  ·  z. B.: Unabhängige Beratung mit Verständnis führender Standardsysteme.
+  {{POSITION_R5_USP}}  —  POSITION: Tabelle, Spalte 'USP', Zeile 5  ·  z. B.: Keine reine Wasserfallberatung
+  {{POSITION_R5_BELEGBARKEIT}}  —  POSITION: Tabelle, Spalte 'Belegbarkeit', Zeile 5  ·  z. B.: Service-Logik grenzt sich von klassischer Wasserfallberatung ab.
+  {{POSITION_R5_WEBSITE_KOMMUNIKATION}}  —  POSITION: Tabelle, Spalte 'Website-Kommunikation', Zeile 5  ·  z. B.: Wir starten dort, wo Wirkung entsteht: im operativen Tagesgeschäft.
+  {{POSITION_PARA_1}}  —  POSITION: Fliesstext-Absatz 1  ·  z. B.: Nicht nur analysieren. Nicht nur konzipieren. Sondern regulatorische Anforderung…
+  {{SITEMAP_TITLE}}  —  SITEMAP: Kapitel-Headline  ·  z. B.: Entscheidungsarchitektur statt Inhaltssammlung.
+  {{SITEMAP_T1_R1_EBENE_1}}  —  SITEMAP: Tabelle, Spalte 'Ebene 1', Zeile 1  ·  z. B.: Leistungen
+  {{SITEMAP_T1_R1_EBENE_2}}  —  SITEMAP: Tabelle, Spalte 'Ebene 2', Zeile 1  ·  z. B.: Regulatory Transformation, Risk Dynamics, IT Integration, Service Implementation…
+  {{SITEMAP_T1_R1_ZWECK}}  —  SITEMAP: Tabelle, Spalte 'Zweck', Zeile 1  ·  z. B.: Conversion-orientierte Solution Pages.
+  {{SITEMAP_T1_R2_EBENE_1}}  —  SITEMAP: Tabelle, Spalte 'Ebene 1', Zeile 2  ·  z. B.: Branchen
+  {{SITEMAP_T1_R2_EBENE_2}}  —  SITEMAP: Tabelle, Spalte 'Ebene 2', Zeile 2  ·  z. B.: Banken, Asset Manager/KVGs, Versicherer, FinTechs, Service & Software Provider
+  {{SITEMAP_T1_R2_ZWECK}}  —  SITEMAP: Tabelle, Spalte 'Zweck', Zeile 2  ·  z. B.: Schnelle Selbstidentifikation.
+  {{SITEMAP_T1_R3_EBENE_1}}  —  SITEMAP: Tabelle, Spalte 'Ebene 1', Zeile 3  ·  z. B.: Knowledge Center
+  {{SITEMAP_T1_R3_EBENE_2}}  —  SITEMAP: Tabelle, Spalte 'Ebene 2', Zeile 3  ·  z. B.: Risk & Valuation, Regulatory Reporting, Trading & Systems, ESG, Archiv
+  {{SITEMAP_T1_R3_ZWECK}}  —  SITEMAP: Tabelle, Spalte 'Zweck', Zeile 3  ·  z. B.: SEO, Expertise, Lead-Nurturing.
+  {{SITEMAP_T1_R4_EBENE_1}}  —  SITEMAP: Tabelle, Spalte 'Ebene 1', Zeile 4  ·  z. B.: Über CVA
+  {{SITEMAP_T1_R4_EBENE_2}}  —  SITEMAP: Tabelle, Spalte 'Ebene 2', Zeile 4  ·  z. B.: Warum CVA, Team, Management, Historie, Code of Conduct
+  {{SITEMAP_T1_R4_ZWECK}}  —  SITEMAP: Tabelle, Spalte 'Zweck', Zeile 4  ·  z. B.: Vertrauen und Arbeitgebermarke.
+  {{SITEMAP_T1_R5_EBENE_1}}  —  SITEMAP: Tabelle, Spalte 'Ebene 1', Zeile 5  ·  z. B.: Karriere
+  {{SITEMAP_T1_R5_EBENE_2}}  —  SITEMAP: Tabelle, Spalte 'Ebene 2', Zeile 5  ·  z. B.: Einstieg, Rollen, Bewerbungsprozess
+  {{SITEMAP_T1_R5_ZWECK}}  —  SITEMAP: Tabelle, Spalte 'Zweck', Zeile 5  ·  z. B.: Recruiting.
+  {{SITEMAP_T1_R6_EBENE_1}}  —  SITEMAP: Tabelle, Spalte 'Ebene 1', Zeile 6  ·  z. B.: Kontakt
+  {{SITEMAP_T1_R6_EBENE_2}}  —  SITEMAP: Tabelle, Spalte 'Ebene 2', Zeile 6  ·  z. B.: Projekt besprechen, Ansprechpartner, Standort
+  {{SITEMAP_T1_R6_ZWECK}}  —  SITEMAP: Tabelle, Spalte 'Zweck', Zeile 6  ·  z. B.: Lead Conversion.
+  {{SITEMAP_T2_R1_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 1  ·  z. B.: Home
+  {{SITEMAP_T2_R1_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 1  ·  z. B.: /de/
+  {{SITEMAP_T2_R2_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 2  ·  z. B.: Leistungen
+  {{SITEMAP_T2_R2_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 2  ·  z. B.: /de/leistungen/
+  {{SITEMAP_T2_R3_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 3  ·  z. B.: Regulatory Transformation
+  {{SITEMAP_T2_R3_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 3  ·  z. B.: /de/leistungen/regulatory-transformation/
+  {{SITEMAP_T2_R4_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 4  ·  z. B.: Risk Dynamics
+  {{SITEMAP_T2_R4_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 4  ·  z. B.: /de/leistungen/risk-dynamics/
+  {{SITEMAP_T2_R5_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 5  ·  z. B.: IT Integration
+  {{SITEMAP_T2_R5_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 5  ·  z. B.: /de/leistungen/it-integration/
+  {{SITEMAP_T2_R6_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 6  ·  z. B.: Service Implementation
+  {{SITEMAP_T2_R6_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 6  ·  z. B.: /de/leistungen/service-implementation/
+  {{SITEMAP_T2_R7_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 7  ·  z. B.: CVA/XVA & Valuation
+  {{SITEMAP_T2_R7_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 7  ·  z. B.: /de/leistungen/cva-xva-valuation/
+  {{SITEMAP_T2_R8_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 8  ·  z. B.: Data & Machine Learning
+  {{SITEMAP_T2_R8_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 8  ·  z. B.: /de/leistungen/machine-learning-risk-data/
+  {{SITEMAP_T2_R9_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 9  ·  z. B.: ESG & Sustainable Finance
+  {{SITEMAP_T2_R9_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 9  ·  z. B.: /de/leistungen/esg-sustainable-finance/
+  {{SITEMAP_T2_R10_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 10  ·  z. B.: Branchen
+  {{SITEMAP_T2_R10_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 10  ·  z. B.: /de/branchen/
+  {{SITEMAP_T2_R11_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 11  ·  z. B.: Knowledge Center
+  {{SITEMAP_T2_R11_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 11  ·  z. B.: /de/knowledge-center/
+  {{SITEMAP_T2_R12_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 12  ·  z. B.: Über CVA
+  {{SITEMAP_T2_R12_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 12  ·  z. B.: /de/ueber-uns/
+  {{SITEMAP_T2_R13_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 13  ·  z. B.: Karriere
+  {{SITEMAP_T2_R13_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 13  ·  z. B.: /de/karriere/
+  {{SITEMAP_T2_R14_SEITE}}  —  SITEMAP: Tabelle, Spalte 'Seite', Zeile 14  ·  z. B.: Kontakt
+  {{SITEMAP_T2_R14_EMPFOHLENE_URL}}  —  SITEMAP: Tabelle, Spalte 'Empfohlene URL', Zeile 14  ·  z. B.: /de/kontakt/
+  {{JOURNEY_TITLE}}  —  JOURNEY: Kapitel-Headline  ·  z. B.: Vom Erstkontakt zum qualifizierten Lead.
+  {{JOURNEY_R1_FUNNEL_STUFE}}  —  JOURNEY: Tabelle, Spalte 'Funnel-Stufe', Zeile 1  ·  z. B.: Awareness
+  {{JOURNEY_R1_CTA}}  —  JOURNEY: Tabelle, Spalte 'CTA', Zeile 1  ·  z. B.: Leistungen ansehen
+  {{JOURNEY_R1_ZWECK}}  —  JOURNEY: Tabelle, Spalte 'Zweck', Zeile 1  ·  z. B.: Orientierung ohne Druck.
+  {{JOURNEY_R2_FUNNEL_STUFE}}  —  JOURNEY: Tabelle, Spalte 'Funnel-Stufe', Zeile 2  ·  z. B.: Problem-aware
+  {{JOURNEY_R2_CTA}}  —  JOURNEY: Tabelle, Spalte 'CTA', Zeile 2  ·  z. B.: Regulatorische Herausforderung besprechen
+  {{JOURNEY_R2_ZWECK}}  —  JOURNEY: Tabelle, Spalte 'Zweck', Zeile 2  ·  z. B.: Beratung öffnen.
+  {{JOURNEY_R3_FUNNEL_STUFE}}  —  JOURNEY: Tabelle, Spalte 'Funnel-Stufe', Zeile 3  ·  z. B.: Solution-aware
+  {{JOURNEY_R3_CTA}}  —  JOURNEY: Tabelle, Spalte 'CTA', Zeile 3  ·  z. B.: Projekt einschätzen lassen
+  {{JOURNEY_R3_ZWECK}}  —  JOURNEY: Tabelle, Spalte 'Zweck', Zeile 3  ·  z. B.: Qualifizierten Lead erzeugen.
+  {{JOURNEY_R4_FUNNEL_STUFE}}  —  JOURNEY: Tabelle, Spalte 'Funnel-Stufe', Zeile 4  ·  z. B.: High Intent
+  {{JOURNEY_R4_CTA}}  —  JOURNEY: Tabelle, Spalte 'CTA', Zeile 4  ·  z. B.: Termin vereinbaren
+  {{JOURNEY_R4_ZWECK}}  —  JOURNEY: Tabelle, Spalte 'Zweck', Zeile 4  ·  z. B.: Direkte Conversion.
+  {{JOURNEY_R5_FUNNEL_STUFE}}  —  JOURNEY: Tabelle, Spalte 'Funnel-Stufe', Zeile 5  ·  z. B.: Skeptisch
+  {{JOURNEY_R5_CTA}}  —  JOURNEY: Tabelle, Spalte 'CTA', Zeile 5  ·  z. B.: Knowledge Center ansehen
+  {{JOURNEY_R5_ZWECK}}  —  JOURNEY: Tabelle, Spalte 'Zweck', Zeile 5  ·  z. B.: Vertrauen vertiefen.
+  {{JOURNEY_R6_FUNNEL_STUFE}}  —  JOURNEY: Tabelle, Spalte 'Funnel-Stufe', Zeile 6  ·  z. B.: Recruiting
+  {{JOURNEY_R6_CTA}}  —  JOURNEY: Tabelle, Spalte 'CTA', Zeile 6  ·  z. B.: Initiativ bewerben
+  {{JOURNEY_R6_ZWECK}}  —  JOURNEY: Tabelle, Spalte 'Zweck', Zeile 6  ·  z. B.: Kandidatenfunnel starten.
+  {{JOURNEY_ITEM_1}}  —  JOURNEY: Listenpunkt  ·  z. B.: Einstieg über Google, LinkedIn, Direktbesuch oder Empfehlung auf Home, Solution …
+  {{JOURNEY_ITEM_2}}  —  JOURNEY: Listenpunkt  ·  z. B.: Problemidentifikation: Regulatorik, Reporting, Risk, IT-Integration oder Bewertu…
+  {{JOURNEY_ITEM_3}}  —  JOURNEY: Listenpunkt  ·  z. B.: Kompetenzbeweis: Rollenmodell, Methodik, Software-/Regulatorik-Know-how, Ansprec…
+  {{JOURNEY_ITEM_4}}  —  JOURNEY: Listenpunkt  ·  z. B.: Risikoreduktion: klare Deliverables, Vorgehensmodell, Prüferverwertbarkeit, Test…
+  {{JOURNEY_ITEM_5}}  —  JOURNEY: Listenpunkt  ·  z. B.: Conversion: Projekt einschätzen lassen, Termin vereinbaren oder thematisches For…
+  {{JOURNEY_ITEM_6}}  —  JOURNEY: Listenpunkt  ·  z. B.: Nachfassen: qualifizierte Anfrage wird intern nach Thema und Projektphase zugeor…
+  {{JOURNEY_STEP_1}}  —  JOURNEY: Prozessschritt 1  ·  z. B.: Einstieg
+  {{JOURNEY_STEP_2}}  —  JOURNEY: Prozessschritt 2  ·  z. B.: Problem­identifikation
+  {{JOURNEY_STEP_3}}  —  JOURNEY: Prozessschritt 3  ·  z. B.: Kompetenz­beweis
+  {{JOURNEY_STEP_4}}  —  JOURNEY: Prozessschritt 4  ·  z. B.: Risiko­reduktion
+  {{JOURNEY_STEP_5}}  —  JOURNEY: Prozessschritt 5  ·  z. B.: Conversion
+  {{JOURNEY_STEP_6}}  —  JOURNEY: Prozessschritt 6  ·  z. B.: Nachfassen
+  {{DESIGN_TITLE}}  —  DESIGN: Kapitel-Headline  ·  z. B.: Premium-Financial. Ruhig. Technologisch präzise.
+  {{DESIGN_LEAD}}  —  DESIGN: Kapitel-Lead  ·  z. B.: Ziel ist ein Auftritt zwischen spezialisierter RegTech-/Risk-Boutique und
+  hoch…
+  {{DESIGN_T1_R1_ELEMENT}}  —  DESIGN: Tabelle, Spalte 'Element', Zeile 1  ·  z. B.: Visueller Stil
+  {{DESIGN_T1_R1_EMPFEHLUNG}}  —  DESIGN: Tabelle, Spalte 'Empfehlung', Zeile 1  ·  z. B.: Editorial + SaaS-Consulting-Hybrid: große Headlines, klare Cards, Prozessdiagram…
+  {{DESIGN_T1_R2_ELEMENT}}  —  DESIGN: Tabelle, Spalte 'Element', Zeile 2  ·  z. B.: Markenwirkung
+  {{DESIGN_T1_R2_EMPFEHLUNG}}  —  DESIGN: Tabelle, Spalte 'Empfehlung', Zeile 2  ·  z. B.: Premium, regulatorisch belastbar, modern-finanziell, ruhig, kompetent.
+  {{DESIGN_T1_R3_ELEMENT}}  —  DESIGN: Tabelle, Spalte 'Element', Zeile 3  ·  z. B.: Farbrichtung
+  {{DESIGN_T1_R3_EMPFEHLUNG}}  —  DESIGN: Tabelle, Spalte 'Empfehlung', Zeile 3  ·  z. B.: Deep Navy, Graphite, Off-White, Platinum Grey, kühles Blau als Akzent, Gold/Bras…
+  {{DESIGN_T1_R4_ELEMENT}}  —  DESIGN: Tabelle, Spalte 'Element', Zeile 4  ·  z. B.: Typografie
+  {{DESIGN_T1_R4_EMPFEHLUNG}}  —  DESIGN: Tabelle, Spalte 'Empfehlung', Zeile 4  ·  z. B.: Präzise serifenlose Business-Typografie wie Inter, IBM Plex Sans oder Aptos/Suis…
+  {{DESIGN_T1_R5_ELEMENT}}  —  DESIGN: Tabelle, Spalte 'Element', Zeile 5  ·  z. B.: Bildsprache
+  {{DESIGN_T1_R5_EMPFEHLUNG}}  —  DESIGN: Tabelle, Spalte 'Empfehlung', Zeile 5  ·  z. B.: Keine generischen Stock-Banker. Abstrakte Finanzdaten, Systemarchitekturen, Fran…
+  {{DESIGN_T1_R6_ELEMENT}}  —  DESIGN: Tabelle, Spalte 'Element', Zeile 6  ·  z. B.: White Space
+  {{DESIGN_T1_R6_EMPFEHLUNG}}  —  DESIGN: Tabelle, Spalte 'Empfehlung', Zeile 6  ·  z. B.: Großzügig, ruhig, mit klaren Informationshierarchien.
+  {{DESIGN_T1_R7_ELEMENT}}  —  DESIGN: Tabelle, Spalte 'Element', Zeile 7  ·  z. B.: UI-Stil
+  {{DESIGN_T1_R7_EMPFEHLUNG}}  —  DESIGN: Tabelle, Spalte 'Empfehlung', Zeile 7  ·  z. B.: Cards, Pills, Trust-Bars, Process Timelines, FAQ Accordions, Sticky CTA, Contact…
+  {{DESIGN_T1_R8_ELEMENT}}  —  DESIGN: Tabelle, Spalte 'Element', Zeile 8  ·  z. B.: Animationen
+  {{DESIGN_T1_R8_EMPFEHLUNG}}  —  DESIGN: Tabelle, Spalte 'Empfehlung', Zeile 8  ·  z. B.: Subtil: Fade-up, Count-up, Diagramm-Linien, Hover-States. Keine überladene Motio…
+  {{DESIGN_T2_R1_KOMPONENTE}}  —  DESIGN: Tabelle, Spalte 'Komponente', Zeile 1  ·  z. B.: Mega-Menü
+  {{DESIGN_T2_R1_EINSATZ}}  —  DESIGN: Tabelle, Spalte 'Einsatz', Zeile 1  ·  z. B.: Navigation nach Leistungen, Branchen, Wissen.
+  {{DESIGN_T2_R1_INTERAKTION}}  —  DESIGN: Tabelle, Spalte 'Interaktion', Zeile 1  ·  z. B.: Hover/Desktop; Accordion/Mobile.
+  {{DESIGN_T2_R2_KOMPONENTE}}  —  DESIGN: Tabelle, Spalte 'Komponente', Zeile 2  ·  z. B.: Solution Cards
+  {{DESIGN_T2_R2_EINSATZ}}  —  DESIGN: Tabelle, Spalte 'Einsatz', Zeile 2  ·  z. B.: Leistungsübersicht und Branchen.
+  {{DESIGN_T2_R2_INTERAKTION}}  —  DESIGN: Tabelle, Spalte 'Interaktion', Zeile 2  ·  z. B.: Hover hebt Ergebnis und CTA hervor.
+  {{DESIGN_T2_R3_KOMPONENTE}}  —  DESIGN: Tabelle, Spalte 'Komponente', Zeile 3  ·  z. B.: Trust Bar
+  {{DESIGN_T2_R3_EINSATZ}}  —  DESIGN: Tabelle, Spalte 'Einsatz', Zeile 3  ·  z. B.: Zielgruppen, Regulatorik, Software-Know-how.
+  {{DESIGN_T2_R3_INTERAKTION}}  —  DESIGN: Tabelle, Spalte 'Interaktion', Zeile 3  ·  z. B.: Sticky oder direkt unter Hero.
+  {{DESIGN_T2_R4_KOMPONENTE}}  —  DESIGN: Tabelle, Spalte 'Komponente', Zeile 4  ·  z. B.: Process Timeline
+  {{DESIGN_T2_R4_EINSATZ}}  —  DESIGN: Tabelle, Spalte 'Einsatz', Zeile 4  ·  z. B.: Vorgehensmodell.
+  {{DESIGN_T2_R4_INTERAKTION}}  —  DESIGN: Tabelle, Spalte 'Interaktion', Zeile 4  ·  z. B.: Desktop horizontal, mobile vertikal.
+  {{DESIGN_T2_R5_KOMPONENTE}}  —  DESIGN: Tabelle, Spalte 'Komponente', Zeile 5  ·  z. B.: FAQ Accordion
+  {{DESIGN_T2_R5_EINSATZ}}  —  DESIGN: Tabelle, Spalte 'Einsatz', Zeile 5  ·  z. B.: Einwände behandeln.
+  {{DESIGN_T2_R5_INTERAKTION}}  —  DESIGN: Tabelle, Spalte 'Interaktion', Zeile 5  ·  z. B.: Einzeln öffnende Akkordeons.
+  {{DESIGN_T2_R6_KOMPONENTE}}  —  DESIGN: Tabelle, Spalte 'Komponente', Zeile 6  ·  z. B.: Contact Drawer
+  {{DESIGN_T2_R6_EINSATZ}}  —  DESIGN: Tabelle, Spalte 'Einsatz', Zeile 6  ·  z. B.: Schneller Kontakt ohne Seitenwechsel.
+  {{DESIGN_T2_R6_INTERAKTION}}  —  DESIGN: Tabelle, Spalte 'Interaktion', Zeile 6  ·  z. B.: Seitliches Panel oder Modal.
+  {{DESIGN_T2_R7_KOMPONENTE}}  —  DESIGN: Tabelle, Spalte 'Komponente', Zeile 7  ·  z. B.: Insight Cards
+  {{DESIGN_T2_R7_EINSATZ}}  —  DESIGN: Tabelle, Spalte 'Einsatz', Zeile 7  ·  z. B.: Knowledge Center.
+  {{DESIGN_T2_R7_INTERAKTION}}  —  DESIGN: Tabelle, Spalte 'Interaktion', Zeile 7  ·  z. B.: Filter, Tags, Lesezeit, Thema.
+  {{COPY_TITLE}}  —  COPY: Kapitel-Headline  ·  z. B.: Sprache, die führt statt beschreibt.
+  {{COPY_CALLOUT_1}}  —  COPY: Callout '8.2 · Empfohlene Subheadline'  ·  z. B.: CVA Services verbindet Financial Engineering, Business Analysis und Integration
+…
+  {{COPY_R1_PRIMARER_CTA}}  —  COPY: Tabelle, Spalte 'Primärer CTA', Zeile 1  ·  z. B.: Projekt unverbindlich einschätzen lassen
+  {{COPY_R1_SEKUNDARER_CTA}}  —  COPY: Tabelle, Spalte 'Sekundärer CTA', Zeile 1  ·  z. B.: Leistungen ansehen
+  {{COPY_R2_PRIMARER_CTA}}  —  COPY: Tabelle, Spalte 'Primärer CTA', Zeile 2  ·  z. B.: Regulatorische Umsetzung besprechen
+  {{COPY_R2_SEKUNDARER_CTA}}  —  COPY: Tabelle, Spalte 'Sekundärer CTA', Zeile 2  ·  z. B.: Knowledge Center öffnen
+  {{COPY_R3_PRIMARER_CTA}}  —  COPY: Tabelle, Spalte 'Primärer CTA', Zeile 3  ·  z. B.: Termin mit CVA vereinbaren
+  {{COPY_R3_SEKUNDARER_CTA}}  —  COPY: Tabelle, Spalte 'Sekundärer CTA', Zeile 3  ·  z. B.: Ansprechpartner kontaktieren
+  {{COPY_R4_PRIMARER_CTA}}  —  COPY: Tabelle, Spalte 'Primärer CTA', Zeile 4  ·  z. B.: IT-Integration prüfen lassen
+  {{COPY_R4_SEKUNDARER_CTA}}  —  COPY: Tabelle, Spalte 'Sekundärer CTA', Zeile 4  ·  z. B.: Vorgehensmodell ansehen
+  {{COPY_R5_PRIMARER_CTA}}  —  COPY: Tabelle, Spalte 'Primärer CTA', Zeile 5  ·  z. B.: Risk-Projekt besprechen
+  {{COPY_R5_SEKUNDARER_CTA}}  —  COPY: Tabelle, Spalte 'Sekundärer CTA', Zeile 5  ·  z. B.: Use Cases ansehen
+  {{COPY_BENEFIT_1}}  —  COPY: Benefit-/Check-Bullet  ·  z. B.: Regulatorische Anforderungen in belastbare Fach- und IT-Konzepte überführen.
+  {{COPY_BENEFIT_2}}  —  COPY: Benefit-/Check-Bullet  ·  z. B.: Trading-, Risiko- und Reporting-Systeme effizient integrieren.
+  {{COPY_BENEFIT_3}}  —  COPY: Benefit-/Check-Bullet  ·  z. B.: Fachbereich, Risk, Meldewesen und IT in einem Projektansatz verbinden.
+  {{COPY_BENEFIT_4}}  —  COPY: Benefit-/Check-Bullet  ·  z. B.: Make-or-Buy-Entscheidungen fundiert vorbereiten.
+  {{COPY_BENEFIT_5}}  —  COPY: Benefit-/Check-Bullet  ·  z. B.: Prüferverwertbare Analysen und Dokumentation erstellen.
+  {{COPY_BENEFIT_6}}  —  COPY: Benefit-/Check-Bullet  ·  z. B.: Komplexe Transformationsprojekte interdisziplinär umsetzen.
+  {{COPY_ITEM_1}}  —  COPY: Listenpunkt  ·  z. B.: Regulatorische Anforderungen in Prozesse, Analysen und IT übersetzen.
+  {{COPY_ITEM_2}}  —  COPY: Listenpunkt  ·  z. B.: Financial Transformation für Banken, Asset Manager und Finanzdienstleister.
+  {{COPY_ITEM_3}}  —  COPY: Listenpunkt  ·  z. B.: Von Regulatorik zu prüferverwertbarer Umsetzung.
+  {{COPY_ITEM_4}}  —  COPY: Listenpunkt  ·  z. B.: Risk, Regulatory und IT-Integration – aus einer Hand umgesetzt.
+  {{COPY_ITEM_5}}  —  COPY: Listenpunkt  ·  z. B.: Managing Financial Transformation – pragmatisch, belastbar, implementiert.
+  {{COPY_ITEM_6}}  —  COPY: Listenpunkt  ·  z. B.: Wann ist CVA der richtige Partner für ein regulatorisches Projekt?
+  {{COPY_ITEM_7}}  —  COPY: Listenpunkt  ·  z. B.: Unterstützt CVA auch die technische Umsetzung oder nur Konzeption?
+  {{COPY_ITEM_8}}  —  COPY: Listenpunkt  ·  z. B.: Arbeitet CVA mit bestehenden Systemen und Providern?
+  {{COPY_ITEM_9}}  —  COPY: Listenpunkt  ·  z. B.: Welche Projektdokumente entstehen typischerweise?
+  {{COPY_ITEM_10}}  —  COPY: Listenpunkt  ·  z. B.: Wie startet eine Zusammenarbeit?
+  {{COPY_ITEM_11}}  —  COPY: Listenpunkt  ·  z. B.: Unterstützt CVA auch kurzfristig in laufenden Projekten?
+  {{COPY_ITEM_12}}  —  COPY: Listenpunkt  ·  z. B.: Welche Rollen bringt CVA in ein Projekt ein?
+  {{WIREFRAME_TITLE}}  —  WIREFRAME: Kapitel-Headline  ·  z. B.: Jede Seite mit Ziel, Sektionen und Conversion-Logik.
+  {{WIREFRAME_LEAD}}  —  WIREFRAME: Kapitel-Lead  ·  z. B.: Die Wireframes sind bewusst textuell und definieren Ziel, CTAs, Section-Reihenfo…
+  {{WIREFRAME_T1_R1_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 1  ·  z. B.: 1 · Header
+  {{WIREFRAME_T1_R1_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 1  ·  z. B.: Logo links, Navigation, CTA rechts.
+  {{WIREFRAME_T1_R1_VISUAL_LAYOUT}}  —  WIREFRAME: Tabelle, Spalte 'Visual & Layout', Zeile 1  ·  z. B.: Sticky Header, Mega-Menü. Mobile: Burger + Sticky Bottom CTA.
+  {{WIREFRAME_T1_R1_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 1  ·  z. B.: Orientierung.
+  {{WIREFRAME_T1_R2_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 2  ·  z. B.: 2 · Hero
+  {{WIREFRAME_T1_R2_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 2  ·  z. B.: H1 + Subheadline + 2 CTAs.
+  {{WIREFRAME_T1_R2_VISUAL_LAYOUT}}  —  WIREFRAME: Tabelle, Spalte 'Visual & Layout', Zeile 2  ·  z. B.: Split Hero: links Copy, rechts Risk-/Systemdaten-Visual.
+  {{WIREFRAME_T1_R2_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 2  ·  z. B.: Sofortige Relevanz.
+  {{WIREFRAME_T1_R3_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 3  ·  z. B.: 3 · Trust-Bar
+  {{WIREFRAME_T1_R3_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 3  ·  z. B.: Banken, Asset Manager, Versicherer, FinTechs, Provider.
+  {{WIREFRAME_T1_R3_VISUAL_LAYOUT}}  —  WIREFRAME: Tabelle, Spalte 'Visual & Layout', Zeile 3  ·  z. B.: Horizontale Pills; mobile Swipe-Bar.
+  {{WIREFRAME_T1_R3_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 3  ·  z. B.: Selbstidentifikation.
+  {{WIREFRAME_T1_R4_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 4  ·  z. B.: 4 · Problem
+  {{WIREFRAME_T1_R4_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 4  ·  z. B.: Regulatorik scheitert an der Umsetzung, nicht am Wissen.
+  {{WIREFRAME_T1_R4_VISUAL_LAYOUT}}  —  WIREFRAME: Tabelle, Spalte 'Visual & Layout', Zeile 4  ·  z. B.: Pain Cards mit Icons.
+  {{WIREFRAME_T1_R4_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 4  ·  z. B.: Problem-Anerkennung.
+  {{WIREFRAME_T1_R5_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 5  ·  z. B.: 5 · Lösungsmodell
+  {{WIREFRAME_T1_R5_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 5  ·  z. B.: Financial Engineering + Business Analysis + Integration Engineering.
+  {{WIREFRAME_T1_R5_VISUAL_LAYOUT}}  —  WIREFRAME: Tabelle, Spalte 'Visual & Layout', Zeile 5  ·  z. B.: Drei-Säulen-Framework.
+  {{WIREFRAME_T1_R5_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 5  ·  z. B.: Differenzierung.
+  {{WIREFRAME_T1_R6_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 6  ·  z. B.: 6 · Leistungen
+  {{WIREFRAME_T1_R6_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 6  ·  z. B.: 6 Kernleistungen.
+  {{WIREFRAME_T1_R6_VISUAL_LAYOUT}}  —  WIREFRAME: Tabelle, Spalte 'Visual & Layout', Zeile 6  ·  z. B.: 6 Solution Cards mit CTA.
+  {{WIREFRAME_T1_R6_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 6  ·  z. B.: Segmentierung.
+  {{WIREFRAME_T1_R7_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 7  ·  z. B.: 7 · Vorgehensmodell
+  {{WIREFRAME_T1_R7_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 7  ·  z. B.: Diagnose → Impact → Fachkonzept → IT → Testing → Betrieb.
+  {{WIREFRAME_T1_R7_VISUAL_LAYOUT}}  —  WIREFRAME: Tabelle, Spalte 'Visual & Layout', Zeile 7  ·  z. B.: Process Timeline.
+  {{WIREFRAME_T1_R7_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 7  ·  z. B.: Risikoreduktion.
+  {{WIREFRAME_T1_R8_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 8  ·  z. B.: 8 · Proof
+  {{WIREFRAME_T1_R8_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 8  ·  z. B.: Regulatorik-Know-how, Software, Historie, Ansprechpartner.
+  {{WIREFRAME_T1_R8_VISUAL_LAYOUT}}  —  WIREFRAME: Tabelle, Spalte 'Visual & Layout', Zeile 8  ·  z. B.: Trust Cards.
+  {{WIREFRAME_T1_R8_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 8  ·  z. B.: Vertrauen.
+  {{WIREFRAME_T1_R9_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 9  ·  z. B.: 9 · Knowledge
+  {{WIREFRAME_T1_R9_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 9  ·  z. B.: 3 Fachthemen als Executive Briefings.
+  {{WIREFRAME_T1_R9_VISUAL_LAYOUT}}  —  WIREFRAME: Tabelle, Spalte 'Visual & Layout', Zeile 9  ·  z. B.: Editorial Cards mit Tags.
+  {{WIREFRAME_T1_R9_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 9  ·  z. B.: Expertise & SEO.
+  {{WIREFRAME_T1_R10_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 10  ·  z. B.: 10 · Ansprechpartner
+  {{WIREFRAME_T1_R10_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 10  ·  z. B.: Kontaktkarten mit Rolle und Direktkontakt.
+  {{WIREFRAME_T1_R10_VISUAL_LAYOUT}}  —  WIREFRAME: Tabelle, Spalte 'Visual & Layout', Zeile 10  ·  z. B.: Porträts, Mail/Phone Buttons.
+  {{WIREFRAME_T1_R10_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 10  ·  z. B.: Persönliches Vertrauen.
+  {{WIREFRAME_T1_R11_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 11  ·  z. B.: 11 · FAQ
+  {{WIREFRAME_T1_R11_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 11  ·  z. B.: Einwände zu Umsetzung, IT, Start, Dokumentation.
+  {{WIREFRAME_T1_R11_VISUAL_LAYOUT}}  —  WIREFRAME: Tabelle, Spalte 'Visual & Layout', Zeile 11  ·  z. B.: Accordion.
+  {{WIREFRAME_T1_R11_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 11  ·  z. B.: Einwandbehandlung.
+  {{WIREFRAME_T1_R12_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 12  ·  z. B.: 12 · Final CTA
+  {{WIREFRAME_T1_R12_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 12  ·  z. B.: Regulatorische Herausforderung einordnen lassen.
+  {{WIREFRAME_T1_R12_VISUAL_LAYOUT}}  —  WIREFRAME: Tabelle, Spalte 'Visual & Layout', Zeile 12  ·  z. B.: Breites CTA Panel.
+  {{WIREFRAME_T1_R12_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 12  ·  z. B.: Lead-Abschluss.
+  {{WIREFRAME_T2_R1_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 1  ·  z. B.: Hero
+  {{WIREFRAME_T2_R1_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 1  ·  z. B.: H1 „Leistungen für Financial Transformation“.
+  {{WIREFRAME_T2_R1_UI_MOBILE}}  —  WIREFRAME: Tabelle, Spalte 'UI / Mobile', Zeile 1  ·  z. B.: Clean Hero mit Service-Matrix-Preview.
+  {{WIREFRAME_T2_R1_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 1  ·  z. B.: Klares Leistungsversprechen.
+  {{WIREFRAME_T2_R2_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 2  ·  z. B.: Service-Matrix
+  {{WIREFRAME_T2_R2_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 2  ·  z. B.: 6 Bereiche mit Problem, Ergebnis, CTA.
+  {{WIREFRAME_T2_R2_UI_MOBILE}}  —  WIREFRAME: Tabelle, Spalte 'UI / Mobile', Zeile 2  ·  z. B.: Cards; mobile 1-spaltig.
+  {{WIREFRAME_T2_R2_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 2  ·  z. B.: Weiterleitung in Solution Pages.
+  {{WIREFRAME_T2_R3_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 3  ·  z. B.: Rollenmodell
+  {{WIREFRAME_T2_R3_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 3  ·  z. B.: Financial Engineers, Business Analysts, Integration Engineers.
+  {{WIREFRAME_T2_R3_UI_MOBILE}}  —  WIREFRAME: Tabelle, Spalte 'UI / Mobile', Zeile 3  ·  z. B.: 3-Spalten-Modul mit Icons.
+  {{WIREFRAME_T2_R3_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 3  ·  z. B.: Differenzierung.
+  {{WIREFRAME_T2_R4_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 4  ·  z. B.: Deliverables
+  {{WIREFRAME_T2_R4_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 4  ·  z. B.: Fach-, DV-, Testkonzept, Impactanalyse, Implementierung, PM.
+  {{WIREFRAME_T2_R4_UI_MOBILE}}  —  WIREFRAME: Tabelle, Spalte 'UI / Mobile', Zeile 4  ·  z. B.: Checklisten-Grid.
+  {{WIREFRAME_T2_R4_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 4  ·  z. B.: Greifbarkeit.
+  {{WIREFRAME_T2_R5_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 5  ·  z. B.: Problem-Selector
+  {{WIREFRAME_T2_R5_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 5  ·  z. B.: Regulatorik, Risiko, IT, Reporting, Bewertung.
+  {{WIREFRAME_T2_R5_UI_MOBILE}}  —  WIREFRAME: Tabelle, Spalte 'UI / Mobile', Zeile 5  ·  z. B.: Interaktive Filter-Komponente.
+  {{WIREFRAME_T2_R5_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 5  ·  z. B.: Bedarfsqualifizierung.
+  {{WIREFRAME_T2_R6_SEKTION}}  —  WIREFRAME: Tabelle, Spalte 'Sektion', Zeile 6  ·  z. B.: CTA
+  {{WIREFRAME_T2_R6_INHALT}}  —  WIREFRAME: Tabelle, Spalte 'Inhalt', Zeile 6  ·  z. B.: In 30 Minuten klären, welcher Ansatz passt.
+  {{WIREFRAME_T2_R6_UI_MOBILE}}  —  WIREFRAME: Tabelle, Spalte 'UI / Mobile', Zeile 6  ·  z. B.: Booking/Formular-Panel.
+  {{WIREFRAME_T2_R6_CONVERSION_ZIEL}}  —  WIREFRAME: Tabelle, Spalte 'Conversion-Ziel', Zeile 6  ·  z. B.: Lead-Generierung.
+  {{WIREFRAME_CARD1_LABEL}}  —  WIREFRAME: Card-Label (Seitenname)  ·  z. B.: Regulatory Transformation
+  {{WIREFRAME_CARD1_TITLE}}  —  WIREFRAME: Card-Titel  ·  z. B.: Regulatory Transformation für Banken & Finanzdienstleister
+  {{WIREFRAME_CARD1_TEXT1}}  —  WIREFRAME: Card-Text  ·  z. B.: Sektionen: Pain (Regulierungsflut, NCA, Reportingdruck) → Ansatz (Monitoring, Im…
+  {{WIREFRAME_CARD2_LABEL}}  —  WIREFRAME: Card-Label (Seitenname)  ·  z. B.: Risk Dynamics
+  {{WIREFRAME_CARD2_TITLE}}  —  WIREFRAME: Card-Titel  ·  z. B.: Risikomodelle, Regulatorik und IT zusammenführen
+  {{WIREFRAME_CARD2_TEXT1}}  —  WIREFRAME: Card-Text  ·  z. B.: Sektionen: Pain → Framework (Kredit-, Marktpreis-, Liquiditäts-, OpRisk, Reporti…
+  {{WIREFRAME_CARD3_LABEL}}  —  WIREFRAME: Card-Label (Seitenname)  ·  z. B.: IT Integration & Service Implementation
+  {{WIREFRAME_CARD3_TITLE}}  —  WIREFRAME: Card-Titel  ·  z. B.: Anforderungen produktiv in die Systemlandschaft integrieren
+  {{WIREFRAME_CARD3_TEXT1}}  —  WIREFRAME: Card-Text  ·  z. B.: Sektionen: Pain (Vendor-Versionen, Lizenzkosten, Schnittstellenrisiken) → Ansatz…
+  {{WIREFRAME_CARD4_LABEL}}  —  WIREFRAME: Card-Label (Seitenname)  ·  z. B.: CVA/XVA & Valuation
+  {{WIREFRAME_CARD4_TITLE}}  —  WIREFRAME: Card-Titel  ·  z. B.: CVA, XVA und Bewertungsanforderungen belastbar umsetzen
+  {{WIREFRAME_CARD4_TEXT1}}  —  WIREFRAME: Card-Text  ·  z. B.: Sektionen: Einordnung (CVA/XVA, IFRS 13, SA-CCR, FRTB) → Problem → Leistungen (M…
+  {{WIREFRAME_CARD5_LABEL}}  —  WIREFRAME: Card-Label (Seitenname)  ·  z. B.: Data & Machine Learning / BCBS 239
+  {{WIREFRAME_CARD5_TITLE}}  —  WIREFRAME: Card-Titel  ·  z. B.: Daten, Modelle und Reports schneller operationalisieren
+  {{WIREFRAME_CARD5_TEXT1}}  —  WIREFRAME: Card-Text  ·  z. B.: Sektionen: Problem → Use Cases (ETL, Predictive Analytics, Modellvalidierung, Re…
+  {{WIREFRAME_CARD6_LABEL}}  —  WIREFRAME: Card-Label (Seitenname)  ·  z. B.: ESG & Sustainable Finance
+  {{WIREFRAME_CARD6_TITLE}}  —  WIREFRAME: Card-Titel  ·  z. B.: ESG-Kriterien transparent definieren und belastbar bewerten
+  {{WIREFRAME_CARD6_TEXT1}}  —  WIREFRAME: Card-Text  ·  z. B.: Sektionen: Problem (Greenwashing, uneinheitliche Kriterien) → Ansatz (klare Defi…
+  {{WIREFRAME_CARD7_LABEL}}  —  WIREFRAME: Card-Label (Seitenname)  ·  z. B.: Branchen
+  {{WIREFRAME_CARD7_TITLE}}  —  WIREFRAME: Card-Titel  ·  z. B.: Financial Transformation für regulierte Marktteilnehmer
+  {{WIREFRAME_CARD7_TEXT1}}  —  WIREFRAME: Card-Text  ·  z. B.: Hero mit Branchen-Pills → Branchen-Cards (Banken, Versicherer, Asset Manager/KVG…
+  {{WIREFRAME_CARD8_LABEL}}  —  WIREFRAME: Card-Label (Seitenname)  ·  z. B.: Knowledge Center
+  {{WIREFRAME_CARD8_TITLE}}  —  WIREFRAME: Card-Titel  ·  z. B.: SEO, Expertise, Lead-Nurturing
+  {{WIREFRAME_CARD8_TEXT1}}  —  WIREFRAME: Card-Text  ·  z. B.: Hero + Suche → Filter-Chips → Featured Insights → Themencluster → Artikel-Templa…
+  {{WIREFRAME_CARD9_LABEL}}  —  WIREFRAME: Card-Label (Seitenname)  ·  z. B.: Über CVA
+  {{WIREFRAME_CARD9_TITLE}}  —  WIREFRAME: Card-Titel  ·  z. B.: Spezialisierte Beratung seit 2012
+  {{WIREFRAME_CARD9_TEXT1}}  —  WIREFRAME: Card-Text  ·  z. B.: Hero → Positionierung → Warum CVA (3 Säulen) → Historie-Timeline (Gründung 2012,…
+  {{WIREFRAME_CARD10_LABEL}}  —  WIREFRAME: Card-Label (Seitenname)  ·  z. B.: Karriere
+  {{WIREFRAME_CARD10_TITLE}}  —  WIREFRAME: Card-Titel  ·  z. B.: Anspruchsvolle Financial-Services-Projekte
+  {{WIREFRAME_CARD10_TEXT1}}  —  WIREFRAME: Card-Text  ·  z. B.: Hero → Arbeitgeberversprechen → Rollen (Financial Engineer, Business Analyst, In…
+  {{WIREFRAME_CARD11_LABEL}}  —  WIREFRAME: Card-Label (Seitenname)  ·  z. B.: Kontakt
+  {{WIREFRAME_CARD11_TITLE}}  —  WIREFRAME: Card-Titel  ·  z. B.: Reibungsarme, qualifizierte Lead-Conversion
+  {{WIREFRAME_CARD11_TEXT1}}  —  WIREFRAME: Card-Text  ·  z. B.: Projektformular: Name, Unternehmen, E-Mail (Pflicht), Rolle, Thema, Projektphase…
+  {{WIREFRAME_WF1_TITLE}}  —  WIREFRAME: Wireframe-Seitentitel  ·  z. B.: Home
+  {{WIREFRAME_WF1_ZIEL}}  —  WIREFRAME: Wireframe-Meta 'Ziel'  ·  z. B.: Positionierung, Vertrauen, Führung zum Erstgespräch.
+  {{WIREFRAME_WF1_PRIMARER_CTA}}  —  WIREFRAME: Wireframe-Meta 'Primärer CTA'  ·  z. B.: Projekt unverbindlich einschätzen lassen.
+  {{WIREFRAME_WF1_SEKUNDARER_CTA}}  —  WIREFRAME: Wireframe-Meta 'Sekundärer CTA'  ·  z. B.: Leistungen ansehen.
+  {{WIREFRAME_WF2_TITLE}}  —  WIREFRAME: Wireframe-Seitentitel  ·  z. B.: Leistungen
+  {{WIREFRAME_WF2_ZIEL}}  —  WIREFRAME: Wireframe-Meta 'Ziel'  ·  z. B.: Besucher in die passende Solution Page führen.
+  {{WIREFRAME_WF2_PRIMARER_CTA}}  —  WIREFRAME: Wireframe-Meta 'Primärer CTA'  ·  z. B.: Passende Lösung finden.
+  {{WIREFRAME_WF2_SEKUNDARER_CTA}}  —  WIREFRAME: Wireframe-Meta 'Sekundärer CTA'  ·  z. B.: Projekt besprechen.
+  {{SEO_TITLE}}  —  SEO: Kapitel-Headline  ·  z. B.: Keyword, Intention und Snippet je Seite.
+  {{SEO_T1_R1_SEITE}}  —  SEO: Tabelle, Spalte 'Seite', Zeile 1  ·  z. B.: Home
+  {{SEO_T1_R1_HAUPTKEYWORD}}  —  SEO: Tabelle, Spalte 'Hauptkeyword', Zeile 1  ·  z. B.: Financial Transformation Beratung
+  {{SEO_T1_R1_INTENTION}}  —  SEO: Tabelle, Spalte 'Intention', Zeile 1  ·  z. B.: Brand + Solution
+  {{SEO_T1_R1_META_TITLE}}  —  SEO: Tabelle, Spalte 'Meta-Title', Zeile 1  ·  z. B.: CVA Services – Financial Transformation für Banken & Finanzdienstleister
+  {{SEO_T1_R2_SEITE}}  —  SEO: Tabelle, Spalte 'Seite', Zeile 2  ·  z. B.: Leistungen
+  {{SEO_T1_R2_HAUPTKEYWORD}}  —  SEO: Tabelle, Spalte 'Hauptkeyword', Zeile 2  ·  z. B.: Beratungsleistungen Finanzdienstleister Regulatorik IT
+  {{SEO_T1_R2_INTENTION}}  —  SEO: Tabelle, Spalte 'Intention', Zeile 2  ·  z. B.: Commercial
+  {{SEO_T1_R2_META_TITLE}}  —  SEO: Tabelle, Spalte 'Meta-Title', Zeile 2  ·  z. B.: Leistungen – Regulatory, Risk & IT Integration
+  {{SEO_T1_R3_SEITE}}  —  SEO: Tabelle, Spalte 'Seite', Zeile 3  ·  z. B.: Regulatory Transformation
+  {{SEO_T1_R3_HAUPTKEYWORD}}  —  SEO: Tabelle, Spalte 'Hauptkeyword', Zeile 3  ·  z. B.: Regulatory Transformation Beratung
+  {{SEO_T1_R3_INTENTION}}  —  SEO: Tabelle, Spalte 'Intention', Zeile 3  ·  z. B.: Commercial
+  {{SEO_T1_R3_META_TITLE}}  —  SEO: Tabelle, Spalte 'Meta-Title', Zeile 3  ·  z. B.: Regulatory Transformation für Banken & Finanzdienstleister
+  {{SEO_T1_R4_SEITE}}  —  SEO: Tabelle, Spalte 'Seite', Zeile 4  ·  z. B.: Risk Dynamics
+  {{SEO_T1_R4_HAUPTKEYWORD}}  —  SEO: Tabelle, Spalte 'Hauptkeyword', Zeile 4  ·  z. B.: Risk Management Beratung Banken
+  {{SEO_T1_R4_INTENTION}}  —  SEO: Tabelle, Spalte 'Intention', Zeile 4  ·  z. B.: Commercial
+  {{SEO_T1_R4_META_TITLE}}  —  SEO: Tabelle, Spalte 'Meta-Title', Zeile 4  ·  z. B.: Risk Dynamics – Risk, Reporting & Modellvalidierung
+  {{SEO_T1_R5_SEITE}}  —  SEO: Tabelle, Spalte 'Seite', Zeile 5  ·  z. B.: IT Integration
+  {{SEO_T1_R5_HAUPTKEYWORD}}  —  SEO: Tabelle, Spalte 'Hauptkeyword', Zeile 5  ·  z. B.: IT Integration Finanzdienstleister
+  {{SEO_T1_R5_INTENTION}}  —  SEO: Tabelle, Spalte 'Intention', Zeile 5  ·  z. B.: Commercial
+  {{SEO_T1_R5_META_TITLE}}  —  SEO: Tabelle, Spalte 'Meta-Title', Zeile 5  ·  z. B.: IT Integration für Trading-, Risiko- und Reporting-Systeme
+  {{SEO_T1_R6_SEITE}}  —  SEO: Tabelle, Spalte 'Seite', Zeile 6  ·  z. B.: Service Implementation
+  {{SEO_T1_R6_HAUPTKEYWORD}}  —  SEO: Tabelle, Spalte 'Hauptkeyword', Zeile 6  ·  z. B.: Service Implementation Regulatory Reporting
+  {{SEO_T1_R6_INTENTION}}  —  SEO: Tabelle, Spalte 'Intention', Zeile 6  ·  z. B.: Commercial
+  {{SEO_T1_R6_META_TITLE}}  —  SEO: Tabelle, Spalte 'Meta-Title', Zeile 6  ·  z. B.: Service Implementation für Finanzdienstleister
+  {{SEO_T1_R7_SEITE}}  —  SEO: Tabelle, Spalte 'Seite', Zeile 7  ·  z. B.: CVA/XVA
+  {{SEO_T1_R7_HAUPTKEYWORD}}  —  SEO: Tabelle, Spalte 'Hauptkeyword', Zeile 7  ·  z. B.: CVA XVA Beratung
+  {{SEO_T1_R7_INTENTION}}  —  SEO: Tabelle, Spalte 'Intention', Zeile 7  ·  z. B.: Commercial / Info
+  {{SEO_T1_R7_META_TITLE}}  —  SEO: Tabelle, Spalte 'Meta-Title', Zeile 7  ·  z. B.: CVA, XVA & Valuation Beratung
+  {{SEO_T1_R8_SEITE}}  —  SEO: Tabelle, Spalte 'Seite', Zeile 8  ·  z. B.: Machine Learning
+  {{SEO_T1_R8_HAUPTKEYWORD}}  —  SEO: Tabelle, Spalte 'Hauptkeyword', Zeile 8  ·  z. B.: Machine Learning Risk Management Banken
+  {{SEO_T1_R8_INTENTION}}  —  SEO: Tabelle, Spalte 'Intention', Zeile 8  ·  z. B.: Info / Commercial
+  {{SEO_T1_R8_META_TITLE}}  —  SEO: Tabelle, Spalte 'Meta-Title', Zeile 8  ·  z. B.: Machine Learning & BCBS 239 für Risk Management
+  {{SEO_T1_R9_SEITE}}  —  SEO: Tabelle, Spalte 'Seite', Zeile 9  ·  z. B.: ESG
+  {{SEO_T1_R9_HAUPTKEYWORD}}  —  SEO: Tabelle, Spalte 'Hauptkeyword', Zeile 9  ·  z. B.: ESG Kriterien Finanzdienstleister
+  {{SEO_T1_R9_INTENTION}}  —  SEO: Tabelle, Spalte 'Intention', Zeile 9  ·  z. B.: Info / Commercial
+  {{SEO_T1_R9_META_TITLE}}  —  SEO: Tabelle, Spalte 'Meta-Title', Zeile 9  ·  z. B.: ESG-Kriterien & Sustainable Finance Beratung
+  {{SEO_T1_R10_SEITE}}  —  SEO: Tabelle, Spalte 'Seite', Zeile 10  ·  z. B.: Knowledge Center
+  {{SEO_T1_R10_HAUPTKEYWORD}}  —  SEO: Tabelle, Spalte 'Hauptkeyword', Zeile 10  ·  z. B.: Regulatorik Risk Knowledge Center
+  {{SEO_T1_R10_INTENTION}}  —  SEO: Tabelle, Spalte 'Intention', Zeile 10  ·  z. B.: Informational
+  {{SEO_T1_R10_META_TITLE}}  —  SEO: Tabelle, Spalte 'Meta-Title', Zeile 10  ·  z. B.: Knowledge Center – Risk, Regulatory & Financial Transformation
+  {{SEO_T1_R11_SEITE}}  —  SEO: Tabelle, Spalte 'Seite', Zeile 11  ·  z. B.: Über uns
+  {{SEO_T1_R11_HAUPTKEYWORD}}  —  SEO: Tabelle, Spalte 'Hauptkeyword', Zeile 11  ·  z. B.: CVA Services
+  {{SEO_T1_R11_INTENTION}}  —  SEO: Tabelle, Spalte 'Intention', Zeile 11  ·  z. B.: Brand
+  {{SEO_T1_R11_META_TITLE}}  —  SEO: Tabelle, Spalte 'Meta-Title', Zeile 11  ·  z. B.: Über CVA Services
+  {{SEO_T1_R12_SEITE}}  —  SEO: Tabelle, Spalte 'Seite', Zeile 12  ·  z. B.: Karriere
+  {{SEO_T1_R12_HAUPTKEYWORD}}  —  SEO: Tabelle, Spalte 'Hauptkeyword', Zeile 12  ·  z. B.: Financial Engineer Business Analyst Integration Engineer
+  {{SEO_T1_R12_INTENTION}}  —  SEO: Tabelle, Spalte 'Intention', Zeile 12  ·  z. B.: Recruiting
+  {{SEO_T1_R12_META_TITLE}}  —  SEO: Tabelle, Spalte 'Meta-Title', Zeile 12  ·  z. B.: Karriere bei CVA Services
+  {{SEO_T1_R13_SEITE}}  —  SEO: Tabelle, Spalte 'Seite', Zeile 13  ·  z. B.: Kontakt
+  {{SEO_T1_R13_HAUPTKEYWORD}}  —  SEO: Tabelle, Spalte 'Hauptkeyword', Zeile 13  ·  z. B.: CVA Services Kontakt
+  {{SEO_T1_R13_INTENTION}}  —  SEO: Tabelle, Spalte 'Intention', Zeile 13  ·  z. B.: Transactional
+  {{SEO_T1_R13_META_TITLE}}  —  SEO: Tabelle, Spalte 'Meta-Title', Zeile 13  ·  z. B.: Kontakt – CVA Services
+  {{SEO_T2_R1_SEITENTYP}}  —  SEO: Tabelle, Spalte 'Seitentyp', Zeile 1  ·  z. B.: Home
+  {{SEO_T2_R1_H1}}  —  SEO: Tabelle, Spalte 'H1', Zeile 1  ·  z. B.: Regulatorische Anforderungen in Prozesse, Analysen und IT übersetzen.
+  {{SEO_T2_R1_H2_STRUKTUR}}  —  SEO: Tabelle, Spalte 'H2-Struktur', Zeile 1  ·  z. B.: Problem · Lösungsmodell · Leistungen · Vorgehen · Proof · Knowledge · FAQ · CTA
+  {{SEO_T2_R2_SEITENTYP}}  —  SEO: Tabelle, Spalte 'Seitentyp', Zeile 2  ·  z. B.: Solution Page
+  {{SEO_T2_R2_H1}}  —  SEO: Tabelle, Spalte 'H1', Zeile 2  ·  z. B.: Spezifisches Problem + Leistung.
+  {{SEO_T2_R2_H2_STRUKTUR}}  —  SEO: Tabelle, Spalte 'H2-Struktur', Zeile 2  ·  z. B.: Pain Points · Ansatz · Deliverables · Use Cases · Proof · FAQ · CTA
+  {{SEO_T2_R3_SEITENTYP}}  —  SEO: Tabelle, Spalte 'Seitentyp', Zeile 3  ·  z. B.: Branche
+  {{SEO_T2_R3_H1}}  —  SEO: Tabelle, Spalte 'H1', Zeile 3  ·  z. B.: Financial Transformation für [Branche].
+  {{SEO_T2_R3_H2_STRUKTUR}}  —  SEO: Tabelle, Spalte 'H2-Struktur', Zeile 3  ·  z. B.: Herausforderungen · relevante Leistungen · typische Projekte · Ansprechpartner ·…
+  {{SEO_T2_R4_SEITENTYP}}  —  SEO: Tabelle, Spalte 'Seitentyp', Zeile 4  ·  z. B.: Insight
+  {{SEO_T2_R4_H1}}  —  SEO: Tabelle, Spalte 'H1', Zeile 4  ·  z. B.: Konkretes Fachthema.
+  {{SEO_T2_R4_H2_STRUKTUR}}  —  SEO: Tabelle, Spalte 'H2-Struktur', Zeile 4  ·  z. B.: Ausgangslage · regulatorischer Kontext · Auswirkungen · CVA-Ansatz · nächste Sch…
+  {{TECHNIK_TITLE}}  —  TECHNIK: Kapitel-Headline  ·  z. B.: CMS, Tracking und Performance als Fundament.
+  {{TECHNIK_T1_R1_CONTENT_TYPE}}  —  TECHNIK: Tabelle, Spalte 'Content Type', Zeile 1  ·  z. B.: Leistungen
+  {{TECHNIK_T1_R1_ZWECK}}  —  TECHNIK: Tabelle, Spalte 'Zweck', Zeile 1  ·  z. B.: Solution Pages
+  {{TECHNIK_T1_R1_WICHTIGE_FELDER}}  —  TECHNIK: Tabelle, Spalte 'Wichtige Felder', Zeile 1  ·  z. B.: Title, Hero, Pain Points, Deliverables, FAQs, CTA, SEO.
+  {{TECHNIK_T1_R2_CONTENT_TYPE}}  —  TECHNIK: Tabelle, Spalte 'Content Type', Zeile 2  ·  z. B.: Branchen
+  {{TECHNIK_T1_R2_ZWECK}}  —  TECHNIK: Tabelle, Spalte 'Zweck', Zeile 2  ·  z. B.: Zielgruppen-Landingpages
+  {{TECHNIK_T1_R2_WICHTIGE_FELDER}}  —  TECHNIK: Tabelle, Spalte 'Wichtige Felder', Zeile 2  ·  z. B.: Branche, Herausforderungen, relevante Leistungen, Ansprechpartner.
+  {{TECHNIK_T1_R3_CONTENT_TYPE}}  —  TECHNIK: Tabelle, Spalte 'Content Type', Zeile 3  ·  z. B.: Insights
+  {{TECHNIK_T1_R3_ZWECK}}  —  TECHNIK: Tabelle, Spalte 'Zweck', Zeile 3  ·  z. B.: Knowledge Center
+  {{TECHNIK_T1_R3_WICHTIGE_FELDER}}  —  TECHNIK: Tabelle, Spalte 'Wichtige Felder', Zeile 3  ·  z. B.: Titel, Kategorie, Tags, Lesezeit, Autor, Datum, CTA.
+  {{TECHNIK_T1_R4_CONTENT_TYPE}}  —  TECHNIK: Tabelle, Spalte 'Content Type', Zeile 4  ·  z. B.: Team
+  {{TECHNIK_T1_R4_ZWECK}}  —  TECHNIK: Tabelle, Spalte 'Zweck', Zeile 4  ·  z. B.: Ansprechpartner
+  {{TECHNIK_T1_R4_WICHTIGE_FELDER}}  —  TECHNIK: Tabelle, Spalte 'Wichtige Felder', Zeile 4  ·  z. B.: Name, Rolle, Fachgebiet, Foto, Kontakt.
+  {{TECHNIK_T1_R5_CONTENT_TYPE}}  —  TECHNIK: Tabelle, Spalte 'Content Type', Zeile 5  ·  z. B.: Jobs
+  {{TECHNIK_T1_R5_ZWECK}}  —  TECHNIK: Tabelle, Spalte 'Zweck', Zeile 5  ·  z. B.: Karriere
+  {{TECHNIK_T1_R5_WICHTIGE_FELDER}}  —  TECHNIK: Tabelle, Spalte 'Wichtige Felder', Zeile 5  ·  z. B.: Rolle, Profil, Aufgaben, Benefits, Bewerbungs-CTA.
+  {{TECHNIK_T1_R6_CONTENT_TYPE}}  —  TECHNIK: Tabelle, Spalte 'Content Type', Zeile 6  ·  z. B.: Downloads
+  {{TECHNIK_T1_R6_ZWECK}}  —  TECHNIK: Tabelle, Spalte 'Zweck', Zeile 6  ·  z. B.: PDFs & Whitepaper
+  {{TECHNIK_T1_R6_WICHTIGE_FELDER}}  —  TECHNIK: Tabelle, Spalte 'Wichtige Felder', Zeile 6  ·  z. B.: Datei, Beschreibung, Gate optional, Tracking.
+  {{TECHNIK_T1_R7_CONTENT_TYPE}}  —  TECHNIK: Tabelle, Spalte 'Content Type', Zeile 7  ·  z. B.: Case Studies
+  {{TECHNIK_T1_R7_ZWECK}}  —  TECHNIK: Tabelle, Spalte 'Zweck', Zeile 7  ·  z. B.: Später ergänzen
+  {{TECHNIK_T1_R7_WICHTIGE_FELDER}}  —  TECHNIK: Tabelle, Spalte 'Wichtige Felder', Zeile 7  ·  z. B.: Nur mit freigegebenen Referenzen und rechtlicher Freigabe.
+  {{TECHNIK_T2_R1_FLOW}}  —  TECHNIK: Tabelle, Spalte 'Flow', Zeile 1  ·  z. B.: Kontaktformular
+  {{TECHNIK_T2_R1_ZWECK}}  —  TECHNIK: Tabelle, Spalte 'Zweck', Zeile 1  ·  z. B.: Standardanfrage.
+  {{TECHNIK_T2_R1_HINWEIS}}  —  TECHNIK: Tabelle, Spalte 'Hinweis', Zeile 1  ·  z. B.: Kurz halten, aber Thema und Projektphase erfassen.
+  {{TECHNIK_T2_R2_FLOW}}  —  TECHNIK: Tabelle, Spalte 'Flow', Zeile 2  ·  z. B.: Terminbuchung
+  {{TECHNIK_T2_R2_ZWECK}}  —  TECHNIK: Tabelle, Spalte 'Zweck', Zeile 2  ·  z. B.: High-Intent-Leads.
+  {{TECHNIK_T2_R2_HINWEIS}}  —  TECHNIK: Tabelle, Spalte 'Hinweis', Zeile 2  ·  z. B.: Calendly oder HubSpot Meetings nur nach Freigabe.
+  {{TECHNIK_T2_R3_FLOW}}  —  TECHNIK: Tabelle, Spalte 'Flow', Zeile 3  ·  z. B.: Download gegen E-Mail
+  {{TECHNIK_T2_R3_ZWECK}}  —  TECHNIK: Tabelle, Spalte 'Zweck', Zeile 3  ·  z. B.: Nurturing.
+  {{TECHNIK_T2_R3_HINWEIS}}  —  TECHNIK: Tabelle, Spalte 'Hinweis', Zeile 3  ·  z. B.: Nur für hochwertige Executive Briefings.
+  {{TECHNIK_T2_R4_FLOW}}  —  TECHNIK: Tabelle, Spalte 'Flow', Zeile 4  ·  z. B.: Schnellkontakt
+  {{TECHNIK_T2_R4_ZWECK}}  —  TECHNIK: Tabelle, Spalte 'Zweck', Zeile 4  ·  z. B.: Vertrauensbasierter B2B-Kontakt.
+  {{TECHNIK_T2_R4_HINWEIS}}  —  TECHNIK: Tabelle, Spalte 'Hinweis', Zeile 4  ·  z. B.: Direkt auf Solution Pages einbinden.
+  {{TECHNIK_T2_R5_FLOW}}  —  TECHNIK: Tabelle, Spalte 'Flow', Zeile 5  ·  z. B.: Karriereformular
+  {{TECHNIK_T2_R5_ZWECK}}  —  TECHNIK: Tabelle, Spalte 'Zweck', Zeile 5  ·  z. B.: Recruiting-Funnel.
+  {{TECHNIK_T2_R5_HINWEIS}}  —  TECHNIK: Tabelle, Spalte 'Hinweis', Zeile 5  ·  z. B.: Upload, Rolle, LinkedIn/Xing optional.
+  {{TECHNIK_BENEFIT_1}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: GA4 plus Google Tag Manager.
+  {{TECHNIK_BENEFIT_2}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: Consent Management sauber integriert.
+  {{TECHNIK_BENEFIT_3}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: LinkedIn Insight Tag für B2B-Retargeting.
+  {{TECHNIK_BENEFIT_4}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: Events: Formularstart/-abschluss, Mail-/Telefon-Klick, Buchung, PDF-Download.
+  {{TECHNIK_BENEFIT_5}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: Scrolltiefe und CTA-Klicks je Solution Page.
+  {{TECHNIK_BENEFIT_6}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: CRM-Übergabe an HubSpot, Pipedrive oder Zoho.
+  {{TECHNIK_BENEFIT_7}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: Lead-Scoring nach Thema, Unternehmenstyp und Projektphase.
+  {{TECHNIK_BENEFIT_8}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: Bilder als WebP/AVIF mit Lazy Loading.
+  {{TECHNIK_BENEFIT_9}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: Critical CSS, Caching und CDN prüfen.
+  {{TECHNIK_BENEFIT_10}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: Barrierearme Kontraste und klare Focus States.
+  {{TECHNIK_BENEFIT_11}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: Mobile-first Navigation und Sticky Bottom CTA.
+  {{TECHNIK_BENEFIT_12}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: Job-PDFs zusätzlich als HTML-Seiten ausspielen.
+  {{TECHNIK_BENEFIT_13}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: Schema: Organization, ProfessionalService, Article, FAQ, JobPosting.
+  {{TECHNIK_BENEFIT_14}}  —  TECHNIK: Benefit-/Check-Bullet  ·  z. B.: Saubere Weiterleitungen für alte URLs.
+  {{UMSETZUNG_TITLE}}  —  UMSETZUNG: Kapitel-Headline  ·  z. B.: Von der Figma-Struktur zur Live-Webseite.
+  {{UMSETZUNG_CALLOUT_1}}  —  UMSETZUNG: Callout 'Nächster sinnvoller Schritt'  ·  z. B.: Dieses Konzept ist direkt als Figma-Briefing nutzbar. Vor finalem UI-Design nur …
+  {{UMSETZUNG_T1_R1_FIGMA_PAGE}}  —  UMSETZUNG: Tabelle, Spalte 'Figma Page', Zeile 1  ·  z. B.: 00 · Foundations
+  {{UMSETZUNG_T1_R1_INHALT}}  —  UMSETZUNG: Tabelle, Spalte 'Inhalt', Zeile 1  ·  z. B.: Farben, Typografie, Grid, Spacing, Icons, Komponentenstates.
+  {{UMSETZUNG_T1_R2_FIGMA_PAGE}}  —  UMSETZUNG: Tabelle, Spalte 'Figma Page', Zeile 2  ·  z. B.: 01 · Components
+  {{UMSETZUNG_T1_R2_INHALT}}  —  UMSETZUNG: Tabelle, Spalte 'Inhalt', Zeile 2  ·  z. B.: Header, Footer, Cards, CTA Panels, Forms, Accordions, Mega-Menü, Timeline.
+  {{UMSETZUNG_T1_R3_FIGMA_PAGE}}  —  UMSETZUNG: Tabelle, Spalte 'Figma Page', Zeile 3  ·  z. B.: 02 · Home
+  {{UMSETZUNG_T1_R3_INHALT}}  —  UMSETZUNG: Tabelle, Spalte 'Inhalt', Zeile 3  ·  z. B.: Desktop und Mobile Wireframe plus UI-Design.
+  {{UMSETZUNG_T1_R4_FIGMA_PAGE}}  —  UMSETZUNG: Tabelle, Spalte 'Figma Page', Zeile 4  ·  z. B.: 03 · Leistungen
+  {{UMSETZUNG_T1_R4_INHALT}}  —  UMSETZUNG: Tabelle, Spalte 'Inhalt', Zeile 4  ·  z. B.: Leistungsübersicht und Solution-Page-Template.
+  {{UMSETZUNG_T1_R5_FIGMA_PAGE}}  —  UMSETZUNG: Tabelle, Spalte 'Figma Page', Zeile 5  ·  z. B.: 04 · Branchen
+  {{UMSETZUNG_T1_R5_INHALT}}  —  UMSETZUNG: Tabelle, Spalte 'Inhalt', Zeile 5  ·  z. B.: Branchenübersicht und Branchen-Template.
+  {{UMSETZUNG_T1_R6_FIGMA_PAGE}}  —  UMSETZUNG: Tabelle, Spalte 'Figma Page', Zeile 6  ·  z. B.: 05 · Knowledge Center
+  {{UMSETZUNG_T1_R6_INHALT}}  —  UMSETZUNG: Tabelle, Spalte 'Inhalt', Zeile 6  ·  z. B.: Listing, Filter, Artikel-Template, Archiv-Label.
+  {{UMSETZUNG_T1_R7_FIGMA_PAGE}}  —  UMSETZUNG: Tabelle, Spalte 'Figma Page', Zeile 7  ·  z. B.: 06 · About / Karriere / Kontakt
+  {{UMSETZUNG_T1_R7_INHALT}}  —  UMSETZUNG: Tabelle, Spalte 'Inhalt', Zeile 7  ·  z. B.: Trust-, Recruiting- und Conversion-Seiten.
+  {{UMSETZUNG_T1_R8_FIGMA_PAGE}}  —  UMSETZUNG: Tabelle, Spalte 'Figma Page', Zeile 8  ·  z. B.: 07 · Prototype
+  {{UMSETZUNG_T1_R8_INHALT}}  —  UMSETZUNG: Tabelle, Spalte 'Inhalt', Zeile 8  ·  z. B.: Klickbarer Funnel von Home → Solution → Kontakt.
+  {{UMSETZUNG_T2_R1_SEITE}}  —  UMSETZUNG: Tabelle, Spalte 'Seite', Zeile 1  ·  z. B.: Home
+  {{UMSETZUNG_T2_R1_SECTION_REIHENFOLGE}}  —  UMSETZUNG: Tabelle, Spalte 'Section-Reihenfolge', Zeile 1  ·  z. B.: Hero · Trust-Bar · Problem · Drei-Kompetenzen · Leistungen · Vorgehen · Proof · …
+  {{UMSETZUNG_T2_R2_SEITE}}  —  UMSETZUNG: Tabelle, Spalte 'Seite', Zeile 2  ·  z. B.: Leistungen
+  {{UMSETZUNG_T2_R2_SECTION_REIHENFOLGE}}  —  UMSETZUNG: Tabelle, Spalte 'Section-Reihenfolge', Zeile 2  ·  z. B.: Hero · Service-Matrix · Rollenmodell · Deliverables · Problem-Selector · CTA.
+  {{UMSETZUNG_T2_R3_SEITE}}  —  UMSETZUNG: Tabelle, Spalte 'Seite', Zeile 3  ·  z. B.: Solution Pages
+  {{UMSETZUNG_T2_R3_SECTION_REIHENFOLGE}}  —  UMSETZUNG: Tabelle, Spalte 'Section-Reihenfolge', Zeile 3  ·  z. B.: Hero · Pain Points · CVA-Ansatz · Deliverables · Themen-/Use-Case-Cards · Proof …
+  {{UMSETZUNG_T2_R4_SEITE}}  —  UMSETZUNG: Tabelle, Spalte 'Seite', Zeile 4  ·  z. B.: Branchen
+  {{UMSETZUNG_T2_R4_SECTION_REIHENFOLGE}}  —  UMSETZUNG: Tabelle, Spalte 'Section-Reihenfolge', Zeile 4  ·  z. B.: Hero · Branchen-Cards · Pain je Branche · relevante Leistungen · Ansprechpartner…
+  {{UMSETZUNG_T2_R5_SEITE}}  —  UMSETZUNG: Tabelle, Spalte 'Seite', Zeile 5  ·  z. B.: Knowledge Center
+  {{UMSETZUNG_T2_R5_SECTION_REIHENFOLGE}}  —  UMSETZUNG: Tabelle, Spalte 'Section-Reihenfolge', Zeile 5  ·  z. B.: Hero + Suche · Filter · Featured Insights · Themencluster · Artikelübersicht · L…
+  {{UMSETZUNG_T2_R6_SEITE}}  —  UMSETZUNG: Tabelle, Spalte 'Seite', Zeile 6  ·  z. B.: Über CVA
+  {{UMSETZUNG_T2_R6_SECTION_REIHENFOLGE}}  —  UMSETZUNG: Tabelle, Spalte 'Section-Reihenfolge', Zeile 6  ·  z. B.: Hero · Positionierung · Historie · Team · Werte/Code of Conduct · CTA.
+  {{UMSETZUNG_T2_R7_SEITE}}  —  UMSETZUNG: Tabelle, Spalte 'Seite', Zeile 7  ·  z. B.: Karriere
+  {{UMSETZUNG_T2_R7_SECTION_REIHENFOLGE}}  —  UMSETZUNG: Tabelle, Spalte 'Section-Reihenfolge', Zeile 7  ·  z. B.: Hero · Arbeitgeberversprechen · Rollen · Benefits · Bewerbungsprozess · CTA.
+  {{UMSETZUNG_T2_R8_SEITE}}  —  UMSETZUNG: Tabelle, Spalte 'Seite', Zeile 8  ·  z. B.: Kontakt
+  {{UMSETZUNG_T2_R8_SECTION_REIHENFOLGE}}  —  UMSETZUNG: Tabelle, Spalte 'Section-Reihenfolge', Zeile 8  ·  z. B.: Hero · Projektformular · Ansprechpartner · Standort · Direktkontakt · Antwortzei…
+  {{UMSETZUNG_ITEM_1}}  —  UMSETZUNG: Listenpunkt  ·  z. B.: Trust visuell verdichten: Rollenmodell, Regulatorik-Expertise, Software-Know-how…
+  {{UMSETZUNG_ITEM_2}}  —  UMSETZUNG: Listenpunkt  ·  z. B.: Karriere-PDFs in moderne HTML-Jobseiten umwandeln.
+  {{UMSETZUNG_ITEM_3}}  —  UMSETZUNG: Listenpunkt  ·  z. B.: Design modernisieren: Premium-Financial, ruhig, präzise, datengetrieben.
+  {{UMSETZUNG_ITEM_4}}  —  UMSETZUNG: Listenpunkt  ·  z. B.: Tracking, Consent, CRM und Conversion Events sauber aufsetzen.
+  {{UMSETZUNG_STEP_1}}  —  UMSETZUNG: Prozessschritt 1  ·  z. B.: Neue Home mit Conversion-Story
+  {{UMSETZUNG_STEP_2}}  —  UMSETZUNG: Prozessschritt 2  ·  z. B.: Leistungen zu Solution Pages
+  {{UMSETZUNG_STEP_3}}  —  UMSETZUNG: Prozessschritt 3  ·  z. B.: Knowledge neu clustern + Archiv
+  {{UMSETZUNG_STEP_4}}  —  UMSETZUNG: Prozessschritt 4  ·  z. B.: Kontakt mit Formular & Termin
+  {{ANHANG_TITLE}}  —  ANHANG: Kapitel-Headline  ·  z. B.: Verwendete Website-Quellen & Datenhinweise
+  {{ANHANG_LEAD}}  —  ANHANG: Kapitel-Lead  ·  z. B.: Die Analyse basiert auf der öffentlich sichtbaren Website. Es lagen keine
+  Tran…
+  {{ANHANG_R1_QUELLE_BEREICH}}  —  ANHANG: Tabelle, Spalte 'Quelle / Bereich', Zeile 1  ·  z. B.: cva-services.eu/de/
+  {{ANHANG_R1_VERWENDUNG_IM_KONZEPT}}  —  ANHANG: Tabelle, Spalte 'Verwendung im Konzept', Zeile 1  ·  z. B.: Startseite und Gesamtpositionierung.
+  {{ANHANG_R2_QUELLE_BEREICH}}  —  ANHANG: Tabelle, Spalte 'Quelle / Bereich', Zeile 2  ·  z. B.: /de/ueber-uns
+  {{ANHANG_R2_VERWENDUNG_IM_KONZEPT}}  —  ANHANG: Tabelle, Spalte 'Verwendung im Konzept', Zeile 2  ·  z. B.: Zielgruppen, Unternehmensprofil, Positionierung.
+  {{ANHANG_R3_QUELLE_BEREICH}}  —  ANHANG: Tabelle, Spalte 'Quelle / Bereich', Zeile 3  ·  z. B.: /de/ueber-uns/unsere-berater
+  {{ANHANG_R3_VERWENDUNG_IM_KONZEPT}}  —  ANHANG: Tabelle, Spalte 'Verwendung im Konzept', Zeile 3  ·  z. B.: Rollenmodell: Financial Engineers, Business Analysts, Integration Engineers.
+  {{ANHANG_R4_QUELLE_BEREICH}}  —  ANHANG: Tabelle, Spalte 'Quelle / Bereich', Zeile 4  ·  z. B.: /de/unser-angebot
+  {{ANHANG_R4_VERWENDUNG_IM_KONZEPT}}  —  ANHANG: Tabelle, Spalte 'Verwendung im Konzept', Zeile 4  ·  z. B.: Leistungslogik und Deliverables.
+  {{ANHANG_R5_QUELLE_BEREICH}}  —  ANHANG: Tabelle, Spalte 'Quelle / Bereich', Zeile 5  ·  z. B.: /de/unser-angebot/service-implementation
+  {{ANHANG_R5_VERWENDUNG_IM_KONZEPT}}  —  ANHANG: Tabelle, Spalte 'Verwendung im Konzept', Zeile 5  ·  z. B.: IT-Integration, Provider Management, Systemlandschaft.
+  {{ANHANG_R6_QUELLE_BEREICH}}  —  ANHANG: Tabelle, Spalte 'Quelle / Bereich', Zeile 6  ·  z. B.: /de/regulatory-transformation
+  {{ANHANG_R6_VERWENDUNG_IM_KONZEPT}}  —  ANHANG: Tabelle, Spalte 'Verwendung im Konzept', Zeile 6  ·  z. B.: Regulatorische Transformation, Regulierungsflut, Datenmanagement.
+  {{ANHANG_R7_QUELLE_BEREICH}}  —  ANHANG: Tabelle, Spalte 'Quelle / Bereich', Zeile 7  ·  z. B.: /de/risk-dynamics
+  {{ANHANG_R7_VERWENDUNG_IM_KONZEPT}}  —  ANHANG: Tabelle, Spalte 'Verwendung im Konzept', Zeile 7  ·  z. B.: Risk-Dynamics-Positionierung und interdisziplinärer Ansatz.
+  {{ANHANG_R8_QUELLE_BEREICH}}  —  ANHANG: Tabelle, Spalte 'Quelle / Bereich', Zeile 8  ·  z. B.: /de/value-adjustment-xva
+  {{ANHANG_R8_VERWENDUNG_IM_KONZEPT}}  —  ANHANG: Tabelle, Spalte 'Verwendung im Konzept', Zeile 8  ·  z. B.: CVA/XVA, Valuation- und Fachthemen.
+  {{ANHANG_R9_QUELLE_BEREICH}}  —  ANHANG: Tabelle, Spalte 'Quelle / Bereich', Zeile 9  ·  z. B.: /de/machine-learning-bcbs-239
+  {{ANHANG_R9_VERWENDUNG_IM_KONZEPT}}  —  ANHANG: Tabelle, Spalte 'Verwendung im Konzept', Zeile 9  ·  z. B.: Data & Machine Learning, ETL, Predictive Analytics, R/Python.
+  {{ANHANG_R10_QUELLE_BEREICH}}  —  ANHANG: Tabelle, Spalte 'Quelle / Bereich', Zeile 10  ·  z. B.: /de/ueber-uns/esg-kriterien
+  {{ANHANG_R10_VERWENDUNG_IM_KONZEPT}}  —  ANHANG: Tabelle, Spalte 'Verwendung im Konzept', Zeile 10  ·  z. B.: ESG-Positionierung und Nachhaltigkeitsbezug.
+  {{ANHANG_R11_QUELLE_BEREICH}}  —  ANHANG: Tabelle, Spalte 'Quelle / Bereich', Zeile 11  ·  z. B.: /de/karriere
+  {{ANHANG_R11_VERWENDUNG_IM_KONZEPT}}  —  ANHANG: Tabelle, Spalte 'Verwendung im Konzept', Zeile 11  ·  z. B.: Karriere, Rollenprofile, Kandidatenzielgruppe.
+  {{FOOT_TEXT}}  —  Dokument-Fuszeile (Fliesstext)  ·  z. B.: CVA Services GmbH · Website-Konzept 2026 · Artefakt …
+  ============================================================================
+-->
+</body>
+</html>

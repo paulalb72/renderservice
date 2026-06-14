@@ -19,8 +19,14 @@ The Docker image includes a `HEALTHCHECK` that calls `http://127.0.0.1:8000/heal
 - `POST /render` accepts the marketing-plan JSON payload and returns a PDF
 - `POST /render/logo-vorschlag` accepts the logo proposal JSON payload and returns a PDF
 - `POST /render/brand-manual` accepts the brand manual JSON payload and returns a PDF
+- `POST /render/website-struktur` accepts the website structure/wireframe JSON payload and returns a PDF
 
 Aliases without hyphen are also available:
 
 - `POST /render/logovorschlag`
 - `POST /render/brandmanual`
+- `POST /render/websitestruktur`
+
+The full template name is also available:
+
+- `POST /render/website-struktur-und-wireframe`

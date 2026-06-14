@@ -10,6 +10,7 @@ Start lokal:
 Endpunkte:
     GET  /health   -> {"status": "ok"}
     POST /render   -> Body: das JSON des LLM-Nodes; Antwort: application/pdf
+    POST /render/website-struktur -> Body: Website-Struktur-JSON; Antwort: application/pdf
 """
 
 import io
@@ -28,6 +29,7 @@ TEMPLATE_DIR = Path(__file__).parent
 MARKETING_TEMPLATE_NAME = "marketingplan_template_makemypage.html"
 LOGO_TEMPLATE_NAME = "logo-abstimmung-template.html"
 BRAND_MANUAL_TEMPLATE_NAME = "brand-manual-template.html"
+WEBSITE_STRUCTURE_TEMPLATE_NAME = "website-struktur-und-wireframe.html"
 
 # erwartete Top-Level-Schlüssel (Konsistenz-Check, optional aber hilfreich)
 MARKETING_REQUIRED_KEYS = [
@@ -57,6 +59,7 @@ def template_required_keys(template_name):
 
 LOGO_REQUIRED_KEYS = template_required_keys(LOGO_TEMPLATE_NAME)
 BRAND_MANUAL_REQUIRED_KEYS = template_required_keys(BRAND_MANUAL_TEMPLATE_NAME)
+WEBSITE_STRUCTURE_REQUIRED_KEYS = template_required_keys(WEBSITE_STRUCTURE_TEMPLATE_NAME)
 
 
 def json_payload():
@@ -225,6 +228,24 @@ def render_brand_manual():
         required_keys=BRAND_MANUAL_REQUIRED_KEYS,
         download_prefix="Brand_Manual",
         filename_value=data.get("COMPANY_NAME") or data.get("COMPANY_LEGAL_NAME"),
+        strip_comments=True,
+    )
+
+
+@app.post("/render/website-struktur")
+@app.post("/render/websitestruktur")
+@app.post("/render/website-struktur-und-wireframe")
+def render_website_structure():
+    data, error_response, status_code = json_payload()
+    if error_response:
+        return error_response, status_code
+
+    return render_pdf(
+        WEBSITE_STRUCTURE_TEMPLATE_NAME,
+        data,
+        required_keys=WEBSITE_STRUCTURE_REQUIRED_KEYS,
+        download_prefix="Website_Struktur",
+        filename_value=data.get("COVER_COMPANY") or data.get("COMPANY_NAME"),
         strip_comments=True,
     )
 

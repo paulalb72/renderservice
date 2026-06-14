@@ -8,7 +8,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Templates muessen mitkopiert werden, weil app.py sie beim Start einliest.
-COPY marketingplan_template_makemypage.html logo-abstimmung-template.html brand-manual-template.html ./
+COPY *.html ./
 COPY app.py .
 
 EXPOSE 8000
